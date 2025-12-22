@@ -11,16 +11,28 @@ namespace CodeReviews.Console.CodingTracker.Models
         {
             get { return _id; }
         }
-        private DateTime startTime { get; set; }
-        private DateTime endTime { get; set; }
-        private TimeSpan duration { get; set; }
+        private readonly DateTime _startTime;
+        public DateTime StartTime
+        {
+            get { return _startTime; }
+        }
+        private readonly DateTime _endTime;
+        public DateTime EndTime
+        {
+            get { return _endTime; }
+        }
+        private readonly TimeSpan _duration;
+        public TimeSpan Duration
+        {
+            get { return _duration; }
+        }
 
-        public CodingSession(int id, DateTime startTime, DateTime endTime, TimeSpan duration)
+        public CodingSession(int id, DateTime startTime, DateTime endTime)
         {
             _id = id;
-            this.startTime = startTime;
-            this.endTime = endTime;
-            this.duration = duration;
+            this._startTime = startTime;
+            this._endTime = endTime;
+            this._duration = endTime - startTime;
         }
     }
 }
