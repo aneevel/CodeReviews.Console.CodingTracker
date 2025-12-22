@@ -1,28 +1,24 @@
-﻿namespace CodingTrackerEngine.Database
+﻿using CodingTrackerEngine.Models;
+
+namespace CodingTrackerEngine.Database
 {
     /// <summary>
     /// Interface <c>IDatabaseManager</c> provides an interface for an object which handles database operations
     /// </summary>
-    public interface IDatabaseManager
+    internal interface IDatabaseManager
     {
         /// <summary>
         /// Read the records from main table
         /// </summary>
-        public abstract void ReadRecords();
+        public abstract List<CodingSession> ReadRecords();
 
         /// <summary>
         /// Insert a record with the passed parameters
         /// </summary>
-        /// <param name="id">id of the record</param>
         /// <param name="startDate">Start Time of the record</param>
         /// <param name="endDate">End Time of the record</param>
         /// <param name="duration">Duration of record</param>
-        public abstract void InsertRecord(
-            string id,
-            DateTime startDate,
-            DateTime endDate,
-            TimeSpan duration
-        );
+        public abstract void InsertRecord(DateTime startDate, DateTime endDate, TimeSpan duration);
 
         /// <summary>
         /// Update a record with the given ID
