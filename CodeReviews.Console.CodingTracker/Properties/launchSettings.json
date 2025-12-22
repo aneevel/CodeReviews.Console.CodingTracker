@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CodeReviews.Console.CodingTracker": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\vboxuser\\source\\repos\\aneevel\\CodeReviews.Console.CodingTracker\\CodeReviews.Console.CodingTracker"
+    }
+  }
+}
