@@ -1,7 +1,6 @@
 ﻿using System.Data.SQLite;
 using CodingTrackerEngine.Models;
 using Dapper;
-using Microsoft.Data.SqlClient;
 
 namespace CodingTrackerEngine.Database
 {
@@ -21,6 +20,31 @@ namespace CodingTrackerEngine.Database
         public SqliteDatabaseManager(string connectionString)
         {
             _connection = new SQLiteConnection(connectionString);
+            Init();
+        }
+
+        /// <summary>
+        /// Sets <c>SqliteDatabaseManager</c> to initial state, creating the needed table if it doesn't exist.
+        /// </summary>
+        private void Init()
+        {
+            if (!TableExists())
+            {
+                CreateTable();
+            }
+        }
+
+        /// <summary>
+        /// Creates the main table (CodingSessions) within the database, given the existing connection
+        /// </summary>
+        private void CreateTable()
+        {
+            using (_connection)
+            {
+                string sql =
+                    "CREATE TABLE IF NOT EXISTS CodingSessions (Id Int PRIMARY KEY AUTO_INCREMENT, StartDate varchar(255) NOT NULL, EndDate varchar(255) NOT NULL, Duration varchar(255) NOT NULL);";
+                _connection!.Execute(sql);
+            }
         }
 
         /// <summary>
