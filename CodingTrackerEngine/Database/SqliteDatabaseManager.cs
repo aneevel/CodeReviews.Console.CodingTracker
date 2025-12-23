@@ -10,7 +10,7 @@ namespace CodingTrackerEngine.Database
     /// </summary>
     internal class SqliteDatabaseManager : IDatabaseManager
     {
-        private readonly SQLiteConnection? _connection;
+        private readonly string _connectionString;
 
         /// <summary>
         /// Constructs a new <c>SqliteDatabaseManager</c> and connects to database with given name.
@@ -19,7 +19,7 @@ namespace CodingTrackerEngine.Database
         /// <param name="connectionString">Name of the database file to connect to</param>
         public SqliteDatabaseManager(string connectionString)
         {
-            _connection = new SQLiteConnection(connectionString);
+            _connectionString = connectionString;
             Init();
         }
 
@@ -39,11 +39,11 @@ namespace CodingTrackerEngine.Database
         /// </summary>
         private void CreateTable()
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql =
-                    "CREATE TABLE IF NOT EXISTS CodingSessions (Id Int PRIMARY KEY AUTO_INCREMENT, StartDate varchar(255) NOT NULL, EndDate varchar(255) NOT NULL, Duration varchar(255) NOT NULL);";
-                _connection!.Execute(sql);
+                    "CREATE TABLE IF NOT EXISTS CodingSessions (Id Int AUTO_INCREMENT PRIMARY KEY, StartDate varchar(255) NOT NULL, EndDate varchar(255) NOT NULL, Duration varchar(255) NOT NULL);";
+                db.Execute(sql);
             }
         }
 
@@ -53,10 +53,10 @@ namespace CodingTrackerEngine.Database
         /// <returns>A List of CodingSession records</returns>
         public List<CodingSession> ReadRecords()
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql = "SELECT * FROM CodingSessions";
-                List<CodingSession> sessions = [.. _connection!.Query<CodingSession>(sql)];
+                List<CodingSession> sessions = [.. db.Query<CodingSession>(sql)];
 
                 return sessions;
             }
@@ -70,11 +70,11 @@ namespace CodingTrackerEngine.Database
         /// <param name="duration">Duration of record</param>
         public void InsertRecord(DateTime startDate, DateTime endDate, TimeSpan duration)
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql =
                     "INSERT INTO CodingSessions (StartDate, EndDate, Duration) VALUES (@startDate, @endDate, @duration)";
-                _connection!.Execute(
+                db.Execute(
                     sql,
                     new
                     {
@@ -95,11 +95,11 @@ namespace CodingTrackerEngine.Database
         /// <param name="duration">Duration of record</param>
         public void UpdateRecord(int id, DateTime startDate, DateTime endDate, TimeSpan duration)
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql =
                     "UPDATE CodingSessions SET StartDate = @startDate, EndDate = @endDate, Duration = @duration WHERE id = @id";
-                _connection!.Execute(
+                db.Execute(
                     sql,
                     new
                     {
@@ -117,10 +117,10 @@ namespace CodingTrackerEngine.Database
         /// <param name="id">ID of the record</param>
         public void DeleteRecord(int id)
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql = "DELETE FROM CodingSessions WHERE id = @id";
-                _connection!.Execute(sql, new { id = id });
+                db.Execute(sql, new { id = id });
             }
         }
 
@@ -130,13 +130,10 @@ namespace CodingTrackerEngine.Database
         /// <param name="id">Id of the record</param>
         public bool RecordExists(int id)
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql = "SELECT * FROM CodingSessions WHERE id = @id";
-                var session = _connection!.QuerySingleOrDefault<CodingSession>(
-                    sql,
-                    new { id = id }
-                );
+                var session = db.QuerySingleOrDefault<CodingSession>(sql, new { id = id });
 
                 return session != null;
             }
@@ -148,13 +145,11 @@ namespace CodingTrackerEngine.Database
         /// <returns> true if it exists, false otherwise </returns>
         public bool TableExists()
         {
-            using (_connection)
+            using (var db = new SQLiteConnection(_connectionString))
             {
                 string sql =
                     "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'CodingSessions'";
-                var tables = _connection!.QuerySingleOrDefault(sql);
-
-                return tables != null;
+                return db.ExecuteScalar<int>(sql) == 0 ? false : true;
             }
         }
     }
