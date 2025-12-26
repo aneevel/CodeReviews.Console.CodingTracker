@@ -45,7 +45,7 @@ namespace CodeReviews.Console.CodingTracker.Database
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql =
-                "CREATE TABLE IF NOT EXISTS CodingSessions (Id Int AUTO_INCREMENT PRIMARY KEY, StartTime varchar(255) NOT NULL, EndTime varchar(255) NOT NULL, Duration varchar(255) NOT NULL);";
+                "CREATE TABLE IF NOT EXISTS CodingSessions (Id INTEGER PRIMARY KEY AUTOINCREMENT, StartTime VARCHAR(255) NOT NULL, EndTime VARCHAR(255) NOT NULL, Duration VARCHAR(255) NOT NULL);";
             db.Execute(sql);
         }
 
@@ -79,6 +79,7 @@ namespace CodeReviews.Console.CodingTracker.Database
         public void InsertRecord(CodingSession session)
         {
             using var db = new SQLiteConnection(_connectionString);
+
             string sql =
                 "INSERT INTO CodingSessions (StartTime, EndTime, Duration) VALUES (@startTime, @endTime, @duration)";
             db.Execute(
