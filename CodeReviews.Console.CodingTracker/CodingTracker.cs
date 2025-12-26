@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
 using CodeReviews.Console.CodingTracker.Database;
 using CodeReviews.Console.CodingTracker.Models;
+using CodeReviews.Console.CodingTracker.Views;
 using Spectre.Console;
-using Spectre.Console.Rendering;
 
 namespace CodeReviews.Console.CodingTracker
 {
@@ -26,16 +26,10 @@ namespace CodeReviews.Console.CodingTracker
         {
             _databaseManager = new(connectionString);
 
-            var panel = new Panel(new FigletText("Coding Tracker").Centered())
-                .DoubleBorder()
-                .BorderColor(Color.Purple)
-                .Expand();
-
-            AnsiConsole.Write(panel);
-
             while (true)
             {
-                AnsiConsole.Write(panel);
+                MainView mainView = new();
+                mainView.Render();
 
                 var option = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
