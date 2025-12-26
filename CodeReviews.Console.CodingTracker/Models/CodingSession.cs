@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace CodingTrackerEngine.Models
+namespace CodeReviews.Console.CodingTracker.Models
 {
     /// <summary>
     /// Coding Session provides a data model for tracking start and end times, as well as duration, for a dedicated session of coding

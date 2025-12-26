@@ -1,6 +1,6 @@
-﻿using CodingTrackerEngine.Models;
+﻿using CodeReviews.Console.CodingTracker.Models;
 
-namespace CodingTrackerEngine.Database
+namespace CodeReviews.Console.CodingTracker.Database
 {
     /// <summary>
     /// Interface <c>IDatabaseManager</c> provides an interface for an object which handles insertion of CodingSessions

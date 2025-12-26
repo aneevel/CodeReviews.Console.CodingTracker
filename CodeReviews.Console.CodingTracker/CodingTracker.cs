@@ -1,23 +1,23 @@
 ﻿using System.Text.Json;
-using CodingTrackerEngine.Database;
-using CodingTrackerEngine.Models;
+using CodeReviews.Console.CodingTracker.Database;
+using CodeReviews.Console.CodingTracker.Models;
 using Spectre.Console;
 
-namespace CodingTrackerEngine
+namespace CodeReviews.Console.CodingTracker
 {
     /// <summary>
     /// Coding Tracker provides the main driver or "engine" for handling the Coding Tracker application
     /// </summary>
     public class CodingTracker
     {
-        private readonly string[] _menuOptions = new string[5]
-        {
+        private readonly string[] _menuOptions =
+        [
             "View All Sessions",
             "Insert Session",
             "Modify Session",
             "Delete Session",
             "Exit Application",
-        };
+        ];
 
         private readonly SqliteDatabaseManager _databaseManager;
 
@@ -103,7 +103,7 @@ namespace CodingTrackerEngine
             }
 
             AnsiConsole.MarkupLine("Press any key to continue...");
-            Console.ReadLine();
+            System.Console.ReadLine();
         }
 
         private void InsertNewSession()
@@ -127,7 +127,7 @@ namespace CodingTrackerEngine
             _databaseManager.InsertRecord(session);
 
             AnsiConsole.MarkupLine("[green]Session created![/] Press any key to continue...");
-            Console.ReadLine();
+            System.Console.ReadLine();
         }
     }
 }

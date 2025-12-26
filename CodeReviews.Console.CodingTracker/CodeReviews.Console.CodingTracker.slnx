@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="../CodingTrackerEngine/CodingTrackerEngine.csproj" />
   <Project Path="CodeReviews.Console.CodingTracker.csproj" />
 </Solution>

@@ -1,8 +1,8 @@
 ﻿using System.Data.SQLite;
-using CodingTrackerEngine.Models;
+using CodeReviews.Console.CodingTracker.Models;
 using Dapper;
 
-namespace CodingTrackerEngine.Database
+namespace CodeReviews.Console.CodingTracker.Database
 {
     /// <summary>
     /// Concrete implementation of <c>IDatabaseManager</c> that can interface with Sqlite databases.

@@ -1,3 +1,3 @@
-﻿using CodingTrackerEngine;
+﻿using CodeReviews.Console.CodingTracker;
 
-CodingTracker codingTracker = new CodingTracker();
+CodingTracker codingTracker = new();

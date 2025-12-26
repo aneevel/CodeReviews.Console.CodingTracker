@@ -480,5 +480,5 @@ $RECYCLE.BIN/
 /CodingTracker.TomDonegan/TextFile1.txt
 
 # App Specific
-/CodeReviews.Console.CodingTracker/coding-tracker.db
-/CodeReviews.Console.CodingTracker/sqlite3.exe
+CodeReviews.Console.CodingTracker/coding-tracker.db
+CodeReviews.Console.CodingTracker/sqlite3.exe

@@ -8,11 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\CodingTrackerEngine\CodingTrackerEngine.csproj" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
   </ItemGroup>
 
 </Project>
