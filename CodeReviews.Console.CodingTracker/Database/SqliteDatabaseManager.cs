@@ -52,8 +52,8 @@ namespace CodeReviews.Console.CodingTracker.Database
         public List<CodingSession> ReadSessions()
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql = "SELECT * FROM CodingSessions";
-            List<CodingSession> sessions = [.. db.Query<CodingSession>(sql)];
+            string sql = "SELECT Id, StartTime, EndTime, Duration FROM CodingSessions";
+            List<CodingSession> sessions = db.Query<CodingSession>(sql).ToList();
 
             return sessions;
         }

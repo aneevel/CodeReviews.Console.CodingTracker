@@ -7,7 +7,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"There was an error during application startup: {ex.Message}");
+    Console.WriteLine($"There was an error during application execution: {ex.Message}");
 }
 
 void Init()
