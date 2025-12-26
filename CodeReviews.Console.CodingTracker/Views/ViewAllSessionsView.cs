@@ -10,14 +10,11 @@ namespace CodeReviews.Console.CodingTracker.Views
 {
     internal class ViewAllSessionsView
     {
-        private static readonly Panel panel = new Panel(new FigletText("Viewing Sessions"))
+        private readonly Panel _panel = new Panel(new FigletText("Viewing Sessions"))
             .DoubleBorder()
             .BorderColor(Color.Purple)
             .Expand();
 
-        internal void Render()
-        {
-            AnsiConsole.Write(panel);
-        }
+        internal void Render() => AnsiConsole.Write(_panel);
     }
 }

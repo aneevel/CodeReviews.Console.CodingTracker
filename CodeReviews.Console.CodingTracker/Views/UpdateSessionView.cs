@@ -3,11 +3,11 @@
 namespace CodeReviews.Console.CodingTracker.Views
 {
     /// <summary>
-    /// View class responsible for rendering the "Main Menu"
+    /// View class responsible for rendering the "Update Session" menu
     /// </summary>
-    internal class MainMenuView
+    internal class UpdateSessionView
     {
-        private readonly Panel _panel = new Panel(new FigletText("Coding Tracker").Centered())
+        private readonly Panel _panel = new Panel(new FigletText("Update Session").Centered())
             .DoubleBorder()
             .BorderColor(Color.Purple)
             .Expand();

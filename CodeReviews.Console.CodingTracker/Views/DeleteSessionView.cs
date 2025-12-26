@@ -3,11 +3,11 @@
 namespace CodeReviews.Console.CodingTracker.Views
 {
     /// <summary>
-    /// View class responsible for rendering the "Main Menu"
+    /// View class responsible for rendering the "Delete Session" menu
     /// </summary>
-    internal class MainMenuView
+    internal class DeleteSessionView
     {
-        private readonly Panel _panel = new Panel(new FigletText("Coding Tracker").Centered())
+        private readonly Panel _panel = new Panel(new FigletText("Delete Session").Centered())
             .DoubleBorder()
             .BorderColor(Color.Purple)
             .Expand();

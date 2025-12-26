@@ -28,6 +28,9 @@ namespace CodeReviews.Console.CodingTracker
 
             MainMenuView mainMenuView = new();
             ViewAllSessionsView viewAllSessionsView = new();
+            InsertNewSessionView insertNewSessionView = new();
+            UpdateSessionView updateSessionView = new();
+            DeleteSessionView deleteSessionView = new();
 
             while (true)
             {
@@ -49,13 +52,13 @@ namespace CodeReviews.Console.CodingTracker
                         ViewAllSessions(viewAllSessionsView);
                         break;
                     case "Insert Session":
-                        InsertNewSession();
+                        InsertNewSession(insertNewSessionView);
                         break;
                     case "Update Session":
-                        UpdateSession();
+                        UpdateSession(updateSessionView);
                         break;
                     case "Delete Session":
-                        DeleteSession();
+                        DeleteSession(deleteSessionView);
                         break;
                     case "Exit Application":
                         Environment.Exit(0);
@@ -101,14 +104,9 @@ namespace CodeReviews.Console.CodingTracker
             System.Console.ReadLine();
         }
 
-        private void InsertNewSession()
+        private void InsertNewSession(InsertNewSessionView insertNewSessionView)
         {
-            var panel = new Panel(new FigletText("Insert Session").Centered())
-                .DoubleBorder()
-                .BorderColor(Color.Purple)
-                .Expand();
-
-            AnsiConsole.Write(panel);
+            insertNewSessionView.Render();
 
             DateTime startTime;
             DateTime endTime;
@@ -185,14 +183,9 @@ namespace CodeReviews.Console.CodingTracker
             System.Console.ReadLine();
         }
 
-        private void UpdateSession()
+        private void UpdateSession(UpdateSessionView updateSessionView)
         {
-            var panel = new Panel(new FigletText("Update Session").Centered())
-                .DoubleBorder()
-                .BorderColor(Color.Purple)
-                .Expand();
-
-            AnsiConsole.Write(panel);
+            updateSessionView.Render();
 
             int id;
             while (true)
@@ -285,14 +278,9 @@ namespace CodeReviews.Console.CodingTracker
             System.Console.ReadLine();
         }
 
-        private void DeleteSession()
+        private void DeleteSession(DeleteSessionView deleteSessionView)
         {
-            var panel = new Panel(new FigletText("Delete Session").Centered())
-                .DoubleBorder()
-                .BorderColor(Color.Purple)
-                .Expand();
-
-            AnsiConsole.Write(panel);
+            deleteSessionView.Render();
 
             int id;
             while (true)
@@ -307,7 +295,7 @@ namespace CodeReviews.Console.CodingTracker
 
             if (
                 !AnsiConsole.Confirm(
-                    "Are you sure you want to [red]delete[/] session with ID {id}?"
+                    $"Are you sure you want to [red]delete[/] session with ID {id}?"
                 )
             )
             {
