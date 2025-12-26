@@ -109,32 +109,74 @@ namespace CodeReviews.Console.CodingTracker
         {
             AnsiConsole.MarkupLine("[yellow]Inserting new session...[/]");
 
-            string startDateResponse = AnsiConsole.Ask<string>(
-                "When did the session begin? Please enter the date and time in format MM/dd/yyyy hh:mm AM/PM"
-            );
+            DateTime startTime;
+            DateTime endTime;
+            while (true)
+            {
+                while (true)
+                {
+                    string startTimeResponse = AnsiConsole.Ask<string>(
+                        "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+                    );
 
-            // TODO: Validation
+                    if (
+                        !DateTime.TryParseExact(
+                            startTimeResponse,
+                            "MM/dd/yyyy hh:mm tt",
+                            new CultureInfo("en-US"),
+                            DateTimeStyles.None,
+                            out startTime
+                        )
+                    )
+                    {
+                        AnsiConsole.WriteLine(
+                            "Incorrect format provided; please provide Start Time in the given format."
+                        );
+                        continue;
+                    }
+                    break;
+                }
 
-            string endDateResponse = AnsiConsole.Ask<string>(
-                "When did the session end? Please enter the date and time in format MM/dd/yyyy hh:mm AM/PM"
-            );
+                while (true)
+                {
+                    string endTimeResponse = AnsiConsole.Ask<string>(
+                        "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+                    );
 
-            // TODO: Validation
+                    if (
+                        !DateTime.TryParseExact(
+                            endTimeResponse,
+                            "MM/dd/yyyy hh:mm tt",
+                            new CultureInfo("en-US"),
+                            DateTimeStyles.None,
+                            out endTime
+                        )
+                    )
+                    {
+                        AnsiConsole.WriteLine(
+                            "Incorrect format provided; please provide End Time in the given format."
+                        );
+                        continue;
+                    }
+                    break;
+                }
+
+                if (startTime > endTime)
+                {
+                    AnsiConsole.MarkupLine(
+                        "Given Start Time occurs [red]AFTER[/] given End Time; please provide a valid set of dates."
+                    );
+                    continue;
+                }
+                break;
+            }
 
             CodingSession session = new()
             {
-                StartTime = DateTime.ParseExact(
-                    startDateResponse,
-                    "MM/dd/yyyy hh:mm tt",
-                    new CultureInfo("en-US")
-                ),
-                EndTime = DateTime.ParseExact(
-                    endDateResponse,
-                    "MM/dd/yyyy hh:mm tt",
-                    new CultureInfo("en-US")
-                ),
+                StartTime = startTime,
+                EndTime = endTime,
+                Duration = endTime - startTime,
             };
-            session.Duration = session.EndTime - session.StartTime;
 
             _databaseManager.InsertRecord(session);
 
@@ -155,27 +197,74 @@ namespace CodeReviews.Console.CodingTracker
                     AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
             }
 
-            string startTimeResponse = AnsiConsole.Ask<string>(
-                "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-            );
-            string endTimeResponse = AnsiConsole.Ask<string>(
-                "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-            );
+            DateTime startTime;
+            DateTime endTime;
+            while (true)
+            {
+                while (true)
+                {
+                    string startTimeResponse = AnsiConsole.Ask<string>(
+                        "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+                    );
+
+                    if (
+                        !DateTime.TryParseExact(
+                            startTimeResponse,
+                            "MM/dd/yyyy hh:mm tt",
+                            new CultureInfo("en-US"),
+                            DateTimeStyles.None,
+                            out startTime
+                        )
+                    )
+                    {
+                        AnsiConsole.WriteLine(
+                            "Incorrect format provided; please provide Start Time in the given format."
+                        );
+                        continue;
+                    }
+                    break;
+                }
+
+                while (true)
+                {
+                    string endTimeResponse = AnsiConsole.Ask<string>(
+                        "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+                    );
+
+                    if (
+                        !DateTime.TryParseExact(
+                            endTimeResponse,
+                            "MM/dd/yyyy hh:mm tt",
+                            new CultureInfo("en-US"),
+                            DateTimeStyles.None,
+                            out endTime
+                        )
+                    )
+                    {
+                        AnsiConsole.WriteLine(
+                            "Incorrect format provided; please provide End Time in the given format."
+                        );
+                        continue;
+                    }
+                    break;
+                }
+
+                if (startTime > endTime)
+                {
+                    AnsiConsole.MarkupLine(
+                        "Given Start Time occurs [red]AFTER[/] given End Time; please provide a valid set of dates."
+                    );
+                    continue;
+                }
+                break;
+            }
 
             CodingSession session = new()
             {
-                StartTime = DateTime.ParseExact(
-                    startTimeResponse,
-                    "MM/dd/yyyy hh:mm tt",
-                    new CultureInfo("en-US")
-                ),
-                EndTime = DateTime.ParseExact(
-                    endTimeResponse,
-                    "MM/dd/yyyy hh:mm tt",
-                    new CultureInfo("en-US")
-                ),
+                StartTime = startTime,
+                EndTime = endTime,
+                Duration = endTime - startTime,
             };
-            session.Duration = session.EndTime - session.StartTime;
 
             _databaseManager.UpdateSession(
                 id,
