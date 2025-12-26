@@ -26,10 +26,12 @@ namespace CodeReviews.Console.CodingTracker
         {
             _databaseManager = new(connectionString);
 
+            MainMenuView mainMenuView = new();
+            ViewAllSessionsView viewAllSessionsView = new();
+
             while (true)
             {
-                MainView mainView = new();
-                mainView.Render();
+                mainMenuView.Render();
 
                 var option = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
@@ -44,7 +46,7 @@ namespace CodeReviews.Console.CodingTracker
                 switch (option)
                 {
                     case "View All Sessions":
-                        ViewAllSessions();
+                        ViewAllSessions(viewAllSessionsView);
                         break;
                     case "Insert Session":
                         InsertNewSession();
@@ -63,14 +65,9 @@ namespace CodeReviews.Console.CodingTracker
             }
         }
 
-        private void ViewAllSessions()
+        private void ViewAllSessions(ViewAllSessionsView viewAllSessionsView)
         {
-            var panel = new Panel(new FigletText("View Sessions").Centered())
-                .DoubleBorder()
-                .BorderColor(Color.Purple)
-                .Expand();
-
-            AnsiConsole.Write(panel);
+            viewAllSessionsView.Render();
 
             var sessions = _databaseManager.ReadSessions();
 
