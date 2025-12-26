@@ -16,12 +16,14 @@ namespace CodeReviews.Console.CodingTracker.Database
         /// <summary>
         /// Constructs a new <c>SqliteDatabaseManager</c> and connects to database with given name.
         /// Creates one if it doesn't exist.
+        /// Adds relevant Type Handlers to help out the reflection system in Dapper
         /// </summary>
         /// <param name="connectionString">Name of the database file to connect to</param>
         public SqliteDatabaseManager(string connectionString)
         {
             _connectionString = connectionString;
             Init();
+
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
@@ -56,7 +58,7 @@ namespace CodeReviews.Console.CodingTracker.Database
             using var db = new SQLiteConnection(_connectionString);
             string sql = "SELECT Id, StartTime, EndTime, Duration FROM CodingSessions";
 
-            List<CodingSession> sessions = new();
+            List<CodingSession> sessions = [];
 
             try
             {
@@ -64,7 +66,7 @@ namespace CodeReviews.Console.CodingTracker.Database
             }
             catch (Exception ex)
             {
-                System.Console.WriteLine(ex);
+                System.Console.WriteLine($"Unable to read sessions due to error: {ex.Message}");
             }
 
             return sessions;

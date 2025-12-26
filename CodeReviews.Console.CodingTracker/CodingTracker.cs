@@ -107,29 +107,31 @@ namespace CodeReviews.Console.CodingTracker
             AnsiConsole.MarkupLine("[yellow]Inserting new session...[/]");
 
             string startDateResponse = AnsiConsole.Ask<string>(
-                "When did the session begin? Please enter the date and time in format MM/dd/yyyy hh:mm"
+                "When did the session begin? Please enter the date and time in format MM/dd/yyyy hh:mm AM/PM"
             );
 
             // TODO: Validation
 
             string endDateResponse = AnsiConsole.Ask<string>(
-                "When did the session end? Please enter the date and time in format MM/dd/yyyy hh:mm"
+                "When did the session end? Please enter the date and time in format MM/dd/yyyy hh:mm AM/PM"
             );
 
             // TODO: Validation
 
-            CodingSession session = new();
-            session.StartTime = DateTime.ParseExact(
-                startDateResponse,
-                "MM/dd/yyyy hh:mm",
-                new CultureInfo("en-US")
-            );
-            session.EndTime = DateTime.ParseExact(
-                endDateResponse,
-                "MM/dd/yyyy hh:mm",
-                new CultureInfo("en-US")
-            );
-            session.Duration = new TimeSpan();
+            CodingSession session = new()
+            {
+                StartTime = DateTime.ParseExact(
+                    startDateResponse,
+                    "MM/dd/yyyy hh:mm tt",
+                    new CultureInfo("en-US")
+                ),
+                EndTime = DateTime.ParseExact(
+                    endDateResponse,
+                    "MM/dd/yyyy hh:mm tt",
+                    new CultureInfo("en-US")
+                ),
+            };
+            session.Duration = session.EndTime - session.StartTime;
 
             _databaseManager.InsertRecord(session);
 
