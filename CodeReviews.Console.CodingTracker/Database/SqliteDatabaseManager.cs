@@ -97,21 +97,21 @@ namespace CodeReviews.Console.CodingTracker.Database
         /// Update a session with the given ID
         /// </summary>
         /// <param name="id">ID of the session</param>
-        /// <param name="startDate">Start Time to update session with</param>
-        /// <param name="endDate">End Time to update session with</param>
+        /// <param name="startTime">Start Time to update session with</param>
+        /// <param name="endTime">End Time to update session with</param>
         /// <param name="duration">Duration to update session with</param>
-        public void UpdateSession(int id, DateTime startDate, DateTime endDate, TimeSpan duration)
+        public void UpdateSession(int id, DateTime startTime, DateTime endTime, TimeSpan duration)
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql =
-                "UPDATE CodingSessions SET StartDate = @startDate, EndDate = @endDate, Duration = @duration WHERE id = @id";
+                "UPDATE CodingSessions SET StartTime = @startTime, EndTime = @endTime, Duration = @duration WHERE id = @id";
             db.Execute(
                 sql,
                 new
                 {
                     id,
-                    startDate = startDate.ToString(),
-                    endDate = endDate.ToString(),
+                    startTime = startTime.ToString(),
+                    endTime = endTime.ToString(),
                     duration = duration.ToString(),
                 }
             );

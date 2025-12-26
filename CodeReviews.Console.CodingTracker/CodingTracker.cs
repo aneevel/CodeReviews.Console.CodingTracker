@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Data.SQLite;
+using System.Globalization;
 using System.Text.Json;
 using CodeReviews.Console.CodingTracker.Database;
 using CodeReviews.Console.CodingTracker.Models;
@@ -15,7 +16,7 @@ namespace CodeReviews.Console.CodingTracker
         [
             "View All Sessions",
             "Insert Session",
-            "Modify Session",
+            "Update Session",
             "Delete Session",
             "Exit Application",
         ];
@@ -54,9 +55,11 @@ namespace CodeReviews.Console.CodingTracker
                     case "Insert Session":
                         InsertNewSession();
                         break;
-                    case "Modify Session":
+                    case "Update Session":
+                        UpdateSession();
                         break;
                     case "Delete Session":
+                        DeleteSession();
                         break;
                     case "Exit Application":
                         Environment.Exit(0);
@@ -136,6 +139,97 @@ namespace CodeReviews.Console.CodingTracker
             _databaseManager.InsertRecord(session);
 
             AnsiConsole.MarkupLine("[green]Session created![/] Press any key to continue...");
+            System.Console.ReadLine();
+        }
+
+        private void UpdateSession()
+        {
+            int id;
+            while (true)
+            {
+                id = AnsiConsole.Ask<int>("Enter the ID for the session you want to modify:");
+
+                if (_databaseManager.SessionExists(id))
+                    break;
+                else
+                    AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
+            }
+
+            string startTimeResponse = AnsiConsole.Ask<string>(
+                "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+            );
+            string endTimeResponse = AnsiConsole.Ask<string>(
+                "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
+            );
+
+            CodingSession session = new()
+            {
+                StartTime = DateTime.ParseExact(
+                    startTimeResponse,
+                    "MM/dd/yyyy hh:mm tt",
+                    new CultureInfo("en-US")
+                ),
+                EndTime = DateTime.ParseExact(
+                    endTimeResponse,
+                    "MM/dd/yyyy hh:mm tt",
+                    new CultureInfo("en-US")
+                ),
+            };
+            session.Duration = session.EndTime - session.StartTime;
+
+            _databaseManager.UpdateSession(
+                id,
+                session.StartTime,
+                session.EndTime,
+                session.Duration
+            );
+
+            AnsiConsole.MarkupLine("[green]Session updated![/] Press any key to continue...");
+            System.Console.ReadLine();
+        }
+
+        private void DeleteSession()
+        {
+            int id;
+            while (true)
+            {
+                id = AnsiConsole.Ask<int>("Enter the ID of the session you wish to delete:");
+
+                if (_databaseManager.SessionExists(id))
+                    break;
+                else
+                    AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
+            }
+
+            if (
+                !AnsiConsole.Confirm(
+                    "Are you sure you want to [red]delete[/] session with ID {id}?"
+                )
+            )
+            {
+                AnsiConsole.MarkupLine(
+                    "Session will not be deleted. Press any key to return to main menu..."
+                );
+                System.Console.ReadLine();
+                return;
+            }
+
+            try
+            {
+                _databaseManager.DeleteSession(id);
+            }
+            // TODO: Be more specific than this
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(
+                    $"Encountered error attempting to delete session with ID {id}: {ex.Message}\nReturning to Main Menu"
+                );
+                return;
+            }
+
+            AnsiConsole.MarkupLine(
+                $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
+            );
             System.Console.ReadLine();
         }
     }
