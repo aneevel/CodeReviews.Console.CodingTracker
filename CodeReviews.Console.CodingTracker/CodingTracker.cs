@@ -1,9 +1,8 @@
-﻿using System.Data.SQLite;
-using System.Globalization;
-using System.Text.Json;
+﻿using System.Globalization;
 using CodeReviews.Console.CodingTracker.Database;
 using CodeReviews.Console.CodingTracker.Models;
 using Spectre.Console;
+using Spectre.Console.Rendering;
 
 namespace CodeReviews.Console.CodingTracker
 {
@@ -25,18 +24,19 @@ namespace CodeReviews.Console.CodingTracker
 
         public CodingTracker(string connectionString)
         {
-            AnsiConsole.MarkupLine(
-                $"[blue]Settings set based on configuration file;[/]\nConnection String: [green]{connectionString}[/]"
-            );
-
             _databaseManager = new(connectionString);
 
-            AnsiConsole.MarkupLine(
-                "Welcome to [purple]Coding Tracker![/] This amazing application allows you to record, modify, delete, and visualize your coding progress via individualized sessions!"
-            );
+            var panel = new Panel(new FigletText("Coding Tracker").Centered())
+                .DoubleBorder()
+                .BorderColor(Color.Purple)
+                .Expand();
+
+            AnsiConsole.Write(panel);
 
             while (true)
             {
+                AnsiConsole.Write(panel);
+
                 var option = AnsiConsole.Prompt(
                     new SelectionPrompt<string>()
                         .Title(
@@ -71,7 +71,12 @@ namespace CodeReviews.Console.CodingTracker
 
         private void ViewAllSessions()
         {
-            AnsiConsole.MarkupLine("[yellow]Viewing all sessions...[/]");
+            var panel = new Panel(new FigletText("View Sessions").Centered())
+                .DoubleBorder()
+                .BorderColor(Color.Purple)
+                .Expand();
+
+            AnsiConsole.Write(panel);
 
             var sessions = _databaseManager.ReadSessions();
 
@@ -107,7 +112,12 @@ namespace CodeReviews.Console.CodingTracker
 
         private void InsertNewSession()
         {
-            AnsiConsole.MarkupLine("[yellow]Inserting new session...[/]");
+            var panel = new Panel(new FigletText("Insert Session").Centered())
+                .DoubleBorder()
+                .BorderColor(Color.Purple)
+                .Expand();
+
+            AnsiConsole.Write(panel);
 
             DateTime startTime;
             DateTime endTime;
@@ -186,6 +196,13 @@ namespace CodeReviews.Console.CodingTracker
 
         private void UpdateSession()
         {
+            var panel = new Panel(new FigletText("Update Session").Centered())
+                .DoubleBorder()
+                .BorderColor(Color.Purple)
+                .Expand();
+
+            AnsiConsole.Write(panel);
+
             int id;
             while (true)
             {
@@ -279,6 +296,13 @@ namespace CodeReviews.Console.CodingTracker
 
         private void DeleteSession()
         {
+            var panel = new Panel(new FigletText("Delete Session").Centered())
+                .DoubleBorder()
+                .BorderColor(Color.Purple)
+                .Expand();
+
+            AnsiConsole.Write(panel);
+
             int id;
             while (true)
             {
