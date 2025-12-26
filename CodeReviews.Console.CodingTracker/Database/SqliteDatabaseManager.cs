@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using CodeReviews.Console.CodingTracker.Handlers;
 using CodeReviews.Console.CodingTracker.Models;
 using Dapper;
 
@@ -21,6 +22,7 @@ namespace CodeReviews.Console.CodingTracker.Database
         {
             _connectionString = connectionString;
             Init();
+            SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
         /// <summary>
@@ -53,7 +55,17 @@ namespace CodeReviews.Console.CodingTracker.Database
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql = "SELECT Id, StartTime, EndTime, Duration FROM CodingSessions";
-            List<CodingSession> sessions = db.Query<CodingSession>(sql).ToList();
+
+            List<CodingSession> sessions = new();
+
+            try
+            {
+                sessions = [.. db.Query<CodingSession>(sql)];
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex);
+            }
 
             return sessions;
         }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using CodeReviews.Console.CodingTracker.Database;
 using CodeReviews.Console.CodingTracker.Models;
 using Spectre.Console;
@@ -117,7 +118,18 @@ namespace CodeReviews.Console.CodingTracker
 
             // TODO: Validation
 
-            CodingSession session = new(startDateResponse, endDateResponse);
+            CodingSession session = new();
+            session.StartTime = DateTime.ParseExact(
+                startDateResponse,
+                "MM/dd/yyyy hh:mm",
+                new CultureInfo("en-US")
+            );
+            session.EndTime = DateTime.ParseExact(
+                endDateResponse,
+                "MM/dd/yyyy hh:mm",
+                new CultureInfo("en-US")
+            );
+            session.Duration = new TimeSpan();
 
             _databaseManager.InsertRecord(session);
 
