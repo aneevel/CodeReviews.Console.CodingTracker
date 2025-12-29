@@ -33,6 +33,23 @@ namespace CodeReviews.Console.CodingTracker
             UpdateSessionView updateSessionView = new();
             DeleteSessionView deleteSessionView = new();
 
+            Run(
+                mainMenuView,
+                viewAllSessionsView,
+                insertNewSessionView,
+                updateSessionView,
+                deleteSessionView
+            );
+        }
+
+        private void Run(
+            MainMenuView mainMenuView,
+            ViewAllSessionsView viewAllSessionsView,
+            InsertNewSessionView insertNewSessionView,
+            UpdateSessionView updateSessionView,
+            DeleteSessionView deleteSessionView
+        )
+        {
             while (true)
             {
                 mainMenuView.Render();
@@ -142,18 +159,7 @@ namespace CodeReviews.Console.CodingTracker
                 return;
             }
 
-            try
-            {
-                _databaseManager.DeleteSession(id);
-            }
-            // TODO: Be more specific than this
-            catch (Exception ex)
-            {
-                System.Console.WriteLine(
-                    $"Encountered error attempting to delete session with ID {id}: {ex.Message}\nReturning to Main Menu"
-                );
-                return;
-            }
+            _databaseManager.DeleteSession(id);
 
             UserInputService.GetUserContinue(
                 $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
