@@ -8,9 +8,11 @@ namespace CodeReviews.Console.CodingTracker.Services
     {
         internal static string GetUserSelection(string message, string[] options)
         {
-            return AnsiConsole.Prompt(
+            string input = AnsiConsole.Prompt(
                 new SelectionPrompt<string>().Title(message).AddChoices(options)
             );
+
+            return input;
         }
 
         internal static CodingSession GetUserCodingSession()
@@ -89,6 +91,7 @@ namespace CodeReviews.Console.CodingTracker.Services
                 GetUserContinue(unconfirmMessage);
                 return false;
             }
+
             return true;
         }
     }

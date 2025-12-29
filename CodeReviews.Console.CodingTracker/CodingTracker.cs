@@ -37,12 +37,10 @@ namespace CodeReviews.Console.CodingTracker
             {
                 mainMenuView.Render();
 
-                var option = UserInputService.GetUserSelection(
+                string option = UserInputService.GetUserSelection(
                     "Welcome to the [grey]Main Menu.[/] Please select one of the following operations.",
                     _menuOptions
                 );
-
-                AnsiConsole.Clear();
 
                 switch (option)
                 {
@@ -62,44 +60,15 @@ namespace CodeReviews.Console.CodingTracker
                         Environment.Exit(0);
                         break;
                 }
-                AnsiConsole.Clear();
             }
         }
 
         private void ViewAllSessions(ViewAllSessionsView viewAllSessionsView)
         {
-            viewAllSessionsView.Render();
-
             var sessions = _databaseManager.ReadSessions();
+            viewAllSessionsView.Render(sessions);
 
-            var table = new Table();
-
-            table.AddColumn(new TableColumn("ID"));
-            table.AddColumn(new TableColumn("Start Date"));
-            table.AddColumn(new TableColumn("End Date"));
-            table.AddColumn(new TableColumn("Duration"));
-
-            if (sessions.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[red]No sessions found![/]");
-            }
-            else
-            {
-                foreach (CodingSession session in sessions)
-                {
-                    table.AddRow(
-                        session.Id.ToString(),
-                        session.StartTime.ToString(),
-                        session.EndTime.ToString(),
-                        session.Duration.ToString()
-                    );
-                }
-
-                AnsiConsole.Write(table);
-            }
-
-            AnsiConsole.MarkupLine("Press any key to continue...");
-            System.Console.ReadLine();
+            UserInputService.GetUserContinue("Press any key to continue...");
         }
 
         private void InsertNewSession(InsertNewSessionView insertNewSessionView)
