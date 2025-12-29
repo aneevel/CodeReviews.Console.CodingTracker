@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using CodeReviews.Console.CodingTracker.Database;
 using CodeReviews.Console.CodingTracker.Models;
+using CodeReviews.Console.CodingTracker.Services;
 using CodeReviews.Console.CodingTracker.Views;
 using Spectre.Console;
 
@@ -36,12 +37,9 @@ namespace CodeReviews.Console.CodingTracker
             {
                 mainMenuView.Render();
 
-                var option = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title(
-                            "Welcome to the [grey]Main Menu.[/] Please select one of the following operations."
-                        )
-                        .AddChoices(_menuOptions)
+                var option = UserInputService.GetUserSelection(
+                    "Welcome to the [grey]Main Menu.[/] Please select one of the following operations.",
+                    _menuOptions
                 );
 
                 AnsiConsole.Clear();
@@ -108,79 +106,13 @@ namespace CodeReviews.Console.CodingTracker
         {
             insertNewSessionView.Render();
 
-            DateTime startTime;
-            DateTime endTime;
-            while (true)
-            {
-                while (true)
-                {
-                    string startTimeResponse = AnsiConsole.Ask<string>(
-                        "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-                    );
-
-                    if (
-                        !DateTime.TryParseExact(
-                            startTimeResponse,
-                            "MM/dd/yyyy hh:mm tt",
-                            new CultureInfo("en-US"),
-                            DateTimeStyles.None,
-                            out startTime
-                        )
-                    )
-                    {
-                        AnsiConsole.WriteLine(
-                            "Incorrect format provided; please provide Start Time in the given format."
-                        );
-                        continue;
-                    }
-                    break;
-                }
-
-                while (true)
-                {
-                    string endTimeResponse = AnsiConsole.Ask<string>(
-                        "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-                    );
-
-                    if (
-                        !DateTime.TryParseExact(
-                            endTimeResponse,
-                            "MM/dd/yyyy hh:mm tt",
-                            new CultureInfo("en-US"),
-                            DateTimeStyles.None,
-                            out endTime
-                        )
-                    )
-                    {
-                        AnsiConsole.WriteLine(
-                            "Incorrect format provided; please provide End Time in the given format."
-                        );
-                        continue;
-                    }
-                    break;
-                }
-
-                if (startTime > endTime)
-                {
-                    AnsiConsole.MarkupLine(
-                        "Given Start Time occurs [red]AFTER[/] given End Time; please provide a valid set of dates."
-                    );
-                    continue;
-                }
-                break;
-            }
-
-            CodingSession session = new()
-            {
-                StartTime = startTime,
-                EndTime = endTime,
-                Duration = endTime - startTime,
-            };
+            CodingSession session = UserInputService.GetUserCodingSession();
 
             _databaseManager.InsertRecord(session);
 
-            AnsiConsole.MarkupLine("[green]Session created![/] Press any key to continue...");
-            System.Console.ReadLine();
+            UserInputService.GetUserContinue(
+                "[green]Session created![/] Press any key to continue..."
+            );
         }
 
         private void UpdateSession(UpdateSessionView updateSessionView)
@@ -190,7 +122,9 @@ namespace CodeReviews.Console.CodingTracker
             int id;
             while (true)
             {
-                id = AnsiConsole.Ask<int>("Enter the ID for the session you want to modify:");
+                id = UserInputService.GetUserSessionId(
+                    "Enter the ID for the session you want to modify:"
+                );
 
                 if (_databaseManager.SessionExists(id))
                     break;
@@ -198,74 +132,7 @@ namespace CodeReviews.Console.CodingTracker
                     AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
             }
 
-            DateTime startTime;
-            DateTime endTime;
-            while (true)
-            {
-                while (true)
-                {
-                    string startTimeResponse = AnsiConsole.Ask<string>(
-                        "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-                    );
-
-                    if (
-                        !DateTime.TryParseExact(
-                            startTimeResponse,
-                            "MM/dd/yyyy hh:mm tt",
-                            new CultureInfo("en-US"),
-                            DateTimeStyles.None,
-                            out startTime
-                        )
-                    )
-                    {
-                        AnsiConsole.WriteLine(
-                            "Incorrect format provided; please provide Start Time in the given format."
-                        );
-                        continue;
-                    }
-                    break;
-                }
-
-                while (true)
-                {
-                    string endTimeResponse = AnsiConsole.Ask<string>(
-                        "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:"
-                    );
-
-                    if (
-                        !DateTime.TryParseExact(
-                            endTimeResponse,
-                            "MM/dd/yyyy hh:mm tt",
-                            new CultureInfo("en-US"),
-                            DateTimeStyles.None,
-                            out endTime
-                        )
-                    )
-                    {
-                        AnsiConsole.WriteLine(
-                            "Incorrect format provided; please provide End Time in the given format."
-                        );
-                        continue;
-                    }
-                    break;
-                }
-
-                if (startTime > endTime)
-                {
-                    AnsiConsole.MarkupLine(
-                        "Given Start Time occurs [red]AFTER[/] given End Time; please provide a valid set of dates."
-                    );
-                    continue;
-                }
-                break;
-            }
-
-            CodingSession session = new()
-            {
-                StartTime = startTime,
-                EndTime = endTime,
-                Duration = endTime - startTime,
-            };
+            CodingSession session = UserInputService.GetUserCodingSession();
 
             _databaseManager.UpdateSession(
                 id,
@@ -274,8 +141,9 @@ namespace CodeReviews.Console.CodingTracker
                 session.Duration
             );
 
-            AnsiConsole.MarkupLine("[green]Session updated![/] Press any key to continue...");
-            System.Console.ReadLine();
+            UserInputService.GetUserContinue(
+                "[green]Session updated![/] Press any key to continue..."
+            );
         }
 
         private void DeleteSession(DeleteSessionView deleteSessionView)
@@ -285,7 +153,9 @@ namespace CodeReviews.Console.CodingTracker
             int id;
             while (true)
             {
-                id = AnsiConsole.Ask<int>("Enter the ID of the session you wish to delete:");
+                id = UserInputService.GetUserSessionId(
+                    "Enter the ID of the session you wish to delete:"
+                );
 
                 if (_databaseManager.SessionExists(id))
                     break;
@@ -294,15 +164,12 @@ namespace CodeReviews.Console.CodingTracker
             }
 
             if (
-                !AnsiConsole.Confirm(
-                    $"Are you sure you want to [red]delete[/] session with ID {id}?"
+                !UserInputService.GetUserConfirmation(
+                    $"Are you sure you want to [red]delete[/] session with ID {id}?",
+                    "Session will not be deleted. Press any key to return to main menu..."
                 )
             )
             {
-                AnsiConsole.MarkupLine(
-                    "Session will not be deleted. Press any key to return to main menu..."
-                );
-                System.Console.ReadLine();
                 return;
             }
 
@@ -319,10 +186,9 @@ namespace CodeReviews.Console.CodingTracker
                 return;
             }
 
-            AnsiConsole.MarkupLine(
+            UserInputService.GetUserContinue(
                 $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
             );
-            System.Console.ReadLine();
         }
     }
 }
