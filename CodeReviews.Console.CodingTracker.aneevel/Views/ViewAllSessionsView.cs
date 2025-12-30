@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CodeReviews.Console.CodingTracker.aneevel.Models;
+﻿using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Spectre.Console;
 
-/// <summary>
-/// View class responsible for rendering "View All Sessions" menu
-/// </summary>
 namespace CodeReviews.Console.CodingTracker.aneevel.Views
 {
     internal class ViewAllSessionsView

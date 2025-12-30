@@ -83,8 +83,6 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             var sessions = _databaseManager.ReadSessions();
             viewAllSessionsView.Render(sessions);
-
-            UserInputService.GetContinue("Press any key to continue...");
         }
 
         private void StartRunningSession(RunningSessionView runningSessionView)
@@ -123,13 +121,23 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             updateSessionView.Render();
 
-            CodingSession originalSession = UserInputService.GetExistingCodingSession(
+            CodingSession selectedSession = UserInputService.GetExistingCodingSession(
                 "Select the session you wish to modify:",
                 _databaseManager.ReadSessions()
             );
 
+            if (
+                !UserInputService.GetConfirmation(
+                    $"Are you sure you want to [blue]modify[/] session with ID {selectedSession.Id}?",
+                    "Session will not be modified. Press any key to return to main menu..."
+                )
+            )
+            {
+                return;
+            }
+
             CodingSession updatedSession = UserInputService.GetNewCodingSession();
-            updatedSession.Id = originalSession.Id;
+            updatedSession.Id = selectedSession.Id;
 
             if (
                 _databaseManager.UpdateSession(
