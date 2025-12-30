@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using CodeReviews.Console.CodingTracker.Models;
 using Spectre.Console;
 
@@ -47,6 +48,40 @@ namespace CodeReviews.Console.CodingTracker.Services
             }
         }
 
+        internal static CodingSession? GetUserRunningCodingSession()
+        {
+            AnsiConsole.Clear();
+
+            if (
+                !GetUserConfirmation(
+                    "Do you wish to [green]start a new coding session[/]?",
+                    "Not starting a new session; press any key to return to main menu"
+                )
+            )
+            {
+                return null;
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            while (true)
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("[blue]Coding session in progress...[/]");
+                AnsiConsole.MarkupLine("Enter [blue]any key[/] to end the session.");
+
+                var elapsed = stopwatch.Elapsed;
+                var stopwatchDisplay = new Markup($"[blue]{elapsed:hh\\:mm\\:ss}[/]");
+                var stopwatchPanel = new Panel(stopwatchDisplay)
+                    .BorderColor(Color.Cyan)
+                    .RoundedBorder();
+                AnsiConsole.Write(stopwatchPanel);
+                Thread.Sleep(1000);
+            }
+
+            return new CodingSession();
+        }
+
         private static DateTime GetUserDate(string promptMessage, string invalidInputMessage)
         {
             while (true)
@@ -77,6 +112,7 @@ namespace CodeReviews.Console.CodingTracker.Services
         {
             AnsiConsole.MarkupLine(promptMessage);
             System.Console.ReadLine();
+            AnsiConsole.Clear();
         }
 
         internal static int GetUserSessionId(string promptMessage)
@@ -92,6 +128,7 @@ namespace CodeReviews.Console.CodingTracker.Services
                 return false;
             }
 
+            AnsiConsole.Clear();
             return true;
         }
     }

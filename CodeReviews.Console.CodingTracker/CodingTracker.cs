@@ -15,6 +15,7 @@ namespace CodeReviews.Console.CodingTracker
         private readonly string[] _menuOptions =
         [
             "View All Sessions",
+            "Start Running Session",
             "Insert Session",
             "Update Session",
             "Delete Session",
@@ -29,6 +30,7 @@ namespace CodeReviews.Console.CodingTracker
 
             MainMenuView mainMenuView = new();
             ViewAllSessionsView viewAllSessionsView = new();
+            RunningSessionView runningSessionView = new();
             InsertNewSessionView insertNewSessionView = new();
             UpdateSessionView updateSessionView = new();
             DeleteSessionView deleteSessionView = new();
@@ -36,6 +38,7 @@ namespace CodeReviews.Console.CodingTracker
             Run(
                 mainMenuView,
                 viewAllSessionsView,
+                runningSessionView,
                 insertNewSessionView,
                 updateSessionView,
                 deleteSessionView
@@ -45,6 +48,7 @@ namespace CodeReviews.Console.CodingTracker
         private void Run(
             MainMenuView mainMenuView,
             ViewAllSessionsView viewAllSessionsView,
+            RunningSessionView runningSessionView,
             InsertNewSessionView insertNewSessionView,
             UpdateSessionView updateSessionView,
             DeleteSessionView deleteSessionView
@@ -63,6 +67,9 @@ namespace CodeReviews.Console.CodingTracker
                 {
                     case "View All Sessions":
                         ViewAllSessions(viewAllSessionsView);
+                        break;
+                    case "Start Running Session":
+                        StartRunningSession(runningSessionView);
                         break;
                     case "Insert Session":
                         InsertNewSession(insertNewSessionView);
@@ -86,6 +93,23 @@ namespace CodeReviews.Console.CodingTracker
             viewAllSessionsView.Render(sessions);
 
             UserInputService.GetUserContinue("Press any key to continue...");
+        }
+
+        private void StartRunningSession(RunningSessionView runningSessionView)
+        {
+            runningSessionView.Render();
+            CodingSession? session = UserInputService.GetUserRunningCodingSession();
+
+            if (session == null)
+            {
+                return;
+            }
+
+            _databaseManager.InsertRecord(session);
+
+            UserInputService.GetUserContinue(
+                "[green]Running session saved![/] Press any key to continue..."
+            );
         }
 
         private void InsertNewSession(InsertNewSessionView insertNewSessionView)
