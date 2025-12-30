@@ -9,27 +9,31 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
 {
     internal class UserInputService
     {
-        internal static MenuOption GetUserSelection(string message)
+        private static readonly int _pageSize = 10;
+
+        internal static MenuOption GetMenuSelection(string message)
         {
             MenuOption input = AnsiConsole.Prompt(
                 new SelectionPrompt<MenuOption>()
                     .Title(message)
                     .AddChoices(Enum.GetValues<MenuOption>())
+                    .PageSize(_pageSize)
+                    .MoreChoicesText("[grey](Use arrow keys to see more options)[/]")
                     .UseConverter(option => option.GetDisplayName())
             );
 
             return input;
         }
 
-        internal static CodingSession GetUserCodingSession()
+        internal static CodingSession GetNewCodingSession()
         {
             while (true)
             {
-                DateTime startTime = GetUserDate(
+                DateTime startTime = GetDate(
                     "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM",
                     "Incorrect format provided; please provide Start Time in the given format."
                 );
-                DateTime endTime = GetUserDate(
+                DateTime endTime = GetDate(
                     "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:",
                     "Incorrect format provided; please provide End Time in the given format."
                 );
@@ -53,12 +57,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
             }
         }
 
-        internal static CodingSession? GetUserRunningCodingSession()
+        internal static CodingSession? GetRunningCodingSession()
         {
             AnsiConsole.Clear();
 
             if (
-                !GetUserConfirmation(
+                !GetConfirmation(
                     "Do you wish to [green]start a new coding session[/]?",
                     "Not starting a new session; press any key to return to main menu"
                 )
@@ -133,7 +137,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
             };
         }
 
-        private static DateTime GetUserDate(string promptMessage, string invalidInputMessage)
+        private static DateTime GetDate(string promptMessage, string invalidInputMessage)
         {
             while (true)
             {
@@ -159,23 +163,35 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
             }
         }
 
-        internal static void GetUserContinue(string promptMessage)
+        internal static void GetContinue(string promptMessage)
         {
             AnsiConsole.MarkupLine(promptMessage);
             System.Console.ReadLine();
             AnsiConsole.Clear();
         }
 
-        internal static int GetUserSessionId(string promptMessage)
+        internal static CodingSession GetExistingCodingSession(
+            string promptMessage,
+            List<CodingSession> codingSessions
+        )
         {
-            return AnsiConsole.Ask<int>(promptMessage);
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<CodingSession>()
+                    .Title(promptMessage)
+                    .AddChoices(codingSessions.Select(codingSession => codingSession))
+                    .PageSize(_pageSize)
+                    .MoreChoicesText("[grey](Use arrow keys to see more options)[/]")
+                    .UseConverter(codingSession =>
+                        $"ID: {codingSession.Id} - Start Time: {codingSession.StartTime} - End Time: {codingSession.EndTime}"
+                    )
+            );
         }
 
-        internal static bool GetUserConfirmation(string promptMessage, string unconfirmMessage)
+        internal static bool GetConfirmation(string promptMessage, string unconfirmMessage)
         {
             if (!AnsiConsole.Confirm(promptMessage))
             {
-                GetUserContinue(unconfirmMessage);
+                GetContinue(unconfirmMessage);
                 return false;
             }
 

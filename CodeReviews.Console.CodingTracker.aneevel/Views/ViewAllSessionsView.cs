@@ -11,41 +11,84 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
 {
     internal class ViewAllSessionsView
     {
+        private readonly int _pageSize = 10;
         private readonly Panel _panel = new Panel(new FigletText("Viewing Sessions"))
             .DoubleBorder()
             .BorderColor(Color.Purple)
             .Expand();
 
-        internal void Render(List<CodingSession> sessions)
+        internal void Render(List<CodingSession> codingSessions)
         {
-            AnsiConsole.Write(_panel);
-            RenderSessions(sessions);
+            RenderSessions(codingSessions);
         }
 
-        private void RenderSessions(List<CodingSession> sessions)
+        private void RenderSessions(List<CodingSession> codingSessions)
         {
-            var table = new Table();
-            table.AddColumn(new TableColumn("ID"));
-            table.AddColumn(new TableColumn("Start Date"));
-            table.AddColumn(new TableColumn("End Date"));
-            table.AddColumn(new TableColumn("Duration"));
-
-            if (sessions.Count == 0)
+            if (codingSessions.Count == 0)
             {
                 AnsiConsole.MarkupLine("[red]No sessions found![/]");
             }
             else
             {
-                foreach (CodingSession session in sessions)
+                var pageIndex = 0;
+                var pageCount = (int)Math.Ceiling(codingSessions.Count / (double)_pageSize);
+
+                while (true)
                 {
-                    table.AddRow(
-                        session.Id.ToString(),
-                        session.StartTime.ToString(),
-                        session.EndTime.ToString(),
-                        session.Duration.ToString()
+                    var table = new Table();
+                    table.AddColumn(new TableColumn("ID"));
+                    table.AddColumn(new TableColumn("Start Date"));
+                    table.AddColumn(new TableColumn("End Date"));
+                    table.AddColumn(new TableColumn("Duration"));
+
+                    AnsiConsole.Write(_panel);
+                    List<CodingSession> pagedSessions = codingSessions
+                        .Skip(pageIndex * _pageSize)
+                        .Take(_pageSize)
+                        .ToList();
+
+                    AnsiConsole.MarkupLine(
+                        $@"Showing sessions {pageIndex * _pageSize} - {pageIndex * _pageSize + 9}
+                        on page {pageIndex + 1} of {pageCount}"
                     );
+
+                    foreach (CodingSession codingSession in pagedSessions)
+                    {
+                        table.AddRow(
+                            codingSession.Id.ToString(),
+                            codingSession.StartTime.ToString(),
+                            codingSession.EndTime.ToString(),
+                            codingSession.Duration.ToString("hh\\:mm\\:ss")
+                        );
+                    }
+
+                    AnsiConsole.Write(table);
+
+                    var prompt = new SelectionPrompt<string>()
+                        .Title("Navigate Pages:")
+                        .AddChoices("Exit to Main Menu");
+
+                    if (pageIndex > 0)
+                    {
+                        prompt.AddChoices("Previous");
+                    }
+
+                    if (pageIndex < pageCount - 1)
+                    {
+                        prompt.AddChoices("Next");
+                    }
+
+                    var menuSelection = AnsiConsole.Prompt(prompt);
+
+                    if (menuSelection == "Next")
+                        pageIndex++;
+                    else if (menuSelection == "Previous")
+                        pageIndex--;
+                    else if (menuSelection == "Exit to Main Menu")
+                        break;
+
+                    AnsiConsole.Clear();
                 }
-                AnsiConsole.Write(table);
             }
         }
     }

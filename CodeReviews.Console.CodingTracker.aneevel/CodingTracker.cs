@@ -49,7 +49,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             {
                 mainMenuView.Render();
 
-                MenuOption option = UserInputService.GetUserSelection(
+                MenuOption option = UserInputService.GetMenuSelection(
                     "Welcome to the [grey]Main Menu.[/] Please select one of the following operations."
                 );
 
@@ -84,13 +84,13 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             var sessions = _databaseManager.ReadSessions();
             viewAllSessionsView.Render(sessions);
 
-            UserInputService.GetUserContinue("Press any key to continue...");
+            UserInputService.GetContinue("Press any key to continue...");
         }
 
         private void StartRunningSession(RunningSessionView runningSessionView)
         {
             runningSessionView.Render();
-            CodingSession? session = UserInputService.GetUserRunningCodingSession();
+            CodingSession? session = UserInputService.GetRunningCodingSession();
 
             if (session == null)
             {
@@ -99,7 +99,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             if (_databaseManager.InsertSession(session) == 0)
             {
-                UserInputService.GetUserContinue(
+                UserInputService.GetContinue(
                     $"[green]Running session saved![/] Your session lasted [green]{session.Duration.Hours} hours, {session.Duration.Minutes} minutes, and {session.Duration.Seconds} seconds[/]! Press any key to continue..."
                 );
             }
@@ -109,11 +109,11 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             insertNewSessionView.Render();
 
-            CodingSession session = UserInputService.GetUserCodingSession();
+            CodingSession session = UserInputService.GetNewCodingSession();
 
             if (_databaseManager.InsertSession(session) == 0)
             {
-                UserInputService.GetUserContinue(
+                UserInputService.GetContinue(
                     "[green]Session created![/] Press any key to continue..."
                 );
             }
@@ -123,31 +123,24 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             updateSessionView.Render();
 
-            int id;
-            while (true)
-            {
-                id = UserInputService.GetUserSessionId(
-                    "Enter the ID for the session you want to modify:"
-                );
+            CodingSession originalSession = UserInputService.GetExistingCodingSession(
+                "Select the session you wish to modify:",
+                _databaseManager.ReadSessions()
+            );
 
-                if (_databaseManager.SessionExists(id))
-                    break;
-                else
-                    AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
-            }
-
-            CodingSession session = UserInputService.GetUserCodingSession();
+            CodingSession updatedSession = UserInputService.GetNewCodingSession();
+            updatedSession.Id = originalSession.Id;
 
             if (
                 _databaseManager.UpdateSession(
-                    id,
-                    session.StartTime,
-                    session.EndTime,
-                    session.Duration
+                    updatedSession.Id,
+                    updatedSession.StartTime,
+                    updatedSession.EndTime,
+                    updatedSession.Duration
                 ) == 0
             )
             {
-                UserInputService.GetUserContinue(
+                UserInputService.GetContinue(
                     "[green]Session updated![/] Press any key to continue..."
                 );
             }
@@ -157,22 +150,14 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             deleteSessionView.Render();
 
-            int id;
-            while (true)
-            {
-                id = UserInputService.GetUserSessionId(
-                    "Enter the ID of the session you wish to delete:"
-                );
-
-                if (_databaseManager.SessionExists(id))
-                    break;
-                else
-                    AnsiConsole.MarkupLine($"[red]Session with ID {id} does not exist![/]");
-            }
+            CodingSession selectedSession = UserInputService.GetExistingCodingSession(
+                "Select the session you wish to delete:",
+                _databaseManager.ReadSessions()
+            );
 
             if (
-                !UserInputService.GetUserConfirmation(
-                    $"Are you sure you want to [red]delete[/] session with ID {id}?",
+                !UserInputService.GetConfirmation(
+                    $"Are you sure you want to [red]delete[/] session with ID {selectedSession.Id}?",
                     "Session will not be deleted. Press any key to return to main menu..."
                 )
             )
@@ -180,10 +165,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            if (_databaseManager.DeleteSession(id) == 0)
+            if (_databaseManager.DeleteSession(selectedSession.Id) == 0)
             {
-                UserInputService.GetUserContinue(
-                    $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
+                UserInputService.GetContinue(
+                    $"Session with ID {selectedSession.Id} successfully [red]deleted![/] Press any key to continue..."
                 );
             }
         }
