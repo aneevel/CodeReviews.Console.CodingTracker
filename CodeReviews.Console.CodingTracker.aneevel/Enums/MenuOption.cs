@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Enums
 {
-    internal enum MenuOptions
+    public enum MenuOption
     {
         [Display(Name = "View all sessions")]
         ViewAllSessions,

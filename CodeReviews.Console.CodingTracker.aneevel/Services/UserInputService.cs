@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
+using CodeReviews.Console.CodingTracker.aneevel.Enums;
+using CodeReviews.Console.CodingTracker.aneevel.Extensions;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Spectre.Console;
 
@@ -7,10 +9,13 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
 {
     internal class UserInputService
     {
-        internal static string GetUserSelection(string message, string[] options)
+        internal static MenuOption GetUserSelection(string message)
         {
-            string input = AnsiConsole.Prompt(
-                new SelectionPrompt<string>().Title(message).AddChoices(options)
+            MenuOption input = AnsiConsole.Prompt(
+                new SelectionPrompt<MenuOption>()
+                    .Title(message)
+                    .AddChoices(Enum.GetValues<MenuOption>())
+                    .UseConverter(option => option.GetDisplayName())
             );
 
             return input;

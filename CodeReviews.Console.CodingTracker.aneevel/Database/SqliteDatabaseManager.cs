@@ -1,6 +1,6 @@
 ﻿using System.Data.SQLite;
+using CodeReviews.Console.CodingTracker.aneevel.Handlers;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
-using CodeReviews.Console.CodingTracker.Handlers;
 using Dapper;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Database

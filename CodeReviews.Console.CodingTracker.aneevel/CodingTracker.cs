@@ -12,16 +12,6 @@ namespace CodeReviews.Console.CodingTracker.aneevel
     /// </summary>
     public class CodingTracker
     {
-        private readonly string[] _menuOptions =
-        [
-            "View All Sessions",
-            "Start Running Session",
-            "Insert Session",
-            "Update Session",
-            "Delete Session",
-            "Exit Application",
-        ];
-
         private readonly SqliteDatabaseManager _databaseManager;
 
         public CodingTracker(string connectionString)
@@ -58,29 +48,28 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             {
                 mainMenuView.Render();
 
-                string option = UserInputService.GetUserSelection(
-                    "Welcome to the [grey]Main Menu.[/] Please select one of the following operations.",
-                    _menuOptions
+                MenuOption option = UserInputService.GetUserSelection(
+                    "Welcome to the [grey]Main Menu.[/] Please select one of the following operations."
                 );
 
                 switch (option)
                 {
-                    case "View All Sessions":
+                    case MenuOption.ViewAllSessions:
                         ViewAllSessions(viewAllSessionsView);
                         break;
-                    case "Start Running Session":
+                    case MenuOption.StartRunningSession:
                         StartRunningSession(runningSessionView);
                         break;
-                    case "Insert Session":
+                    case MenuOption.InsertSession:
                         InsertNewSession(insertNewSessionView);
                         break;
-                    case "Update Session":
+                    case MenuOption.UpdateSession:
                         UpdateSession(updateSessionView);
                         break;
-                    case "Delete Session":
+                    case MenuOption.DeleteSession:
                         DeleteSession(deleteSessionView);
                         break;
-                    case "Exit Application":
+                    case MenuOption.ExitApplication:
                         Environment.Exit(0);
                         break;
                 }
