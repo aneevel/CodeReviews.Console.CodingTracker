@@ -3,6 +3,7 @@ using CodeReviews.Console.CodingTracker.aneevel.Enums;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using CodeReviews.Console.CodingTracker.aneevel.Services;
 using CodeReviews.Console.CodingTracker.aneevel.Views;
+using Serilog;
 using Spectre.Console;
 
 namespace CodeReviews.Console.CodingTracker.aneevel
@@ -96,11 +97,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            _databaseManager.InsertRecord(session);
-
-            UserInputService.GetUserContinue(
-                $"[green]Running session saved![/] Your session lasted [green]{session.Duration.Hours} hours, {session.Duration.Minutes} minutes, and {session.Duration.Seconds} seconds[/]! Press any key to continue..."
-            );
+            if (_databaseManager.InsertSession(session) == 0)
+            {
+                UserInputService.GetUserContinue(
+                    $"[green]Running session saved![/] Your session lasted [green]{session.Duration.Hours} hours, {session.Duration.Minutes} minutes, and {session.Duration.Seconds} seconds[/]! Press any key to continue..."
+                );
+            }
         }
 
         private void InsertNewSession(InsertNewSessionView insertNewSessionView)
@@ -109,11 +111,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             CodingSession session = UserInputService.GetUserCodingSession();
 
-            _databaseManager.InsertRecord(session);
-
-            UserInputService.GetUserContinue(
-                "[green]Session created![/] Press any key to continue..."
-            );
+            if (_databaseManager.InsertSession(session) == 0)
+            {
+                UserInputService.GetUserContinue(
+                    "[green]Session created![/] Press any key to continue..."
+                );
+            }
         }
 
         private void UpdateSession(UpdateSessionView updateSessionView)
@@ -135,16 +138,19 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             CodingSession session = UserInputService.GetUserCodingSession();
 
-            _databaseManager.UpdateSession(
-                id,
-                session.StartTime,
-                session.EndTime,
-                session.Duration
-            );
-
-            UserInputService.GetUserContinue(
-                "[green]Session updated![/] Press any key to continue..."
-            );
+            if (
+                _databaseManager.UpdateSession(
+                    id,
+                    session.StartTime,
+                    session.EndTime,
+                    session.Duration
+                ) == 0
+            )
+            {
+                UserInputService.GetUserContinue(
+                    "[green]Session updated![/] Press any key to continue..."
+                );
+            }
         }
 
         private void DeleteSession(DeleteSessionView deleteSessionView)
@@ -174,11 +180,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            _databaseManager.DeleteSession(id);
-
-            UserInputService.GetUserContinue(
-                $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
-            );
+            if (_databaseManager.DeleteSession(id) == 0)
+            {
+                UserInputService.GetUserContinue(
+                    $"Session with ID {id} successfully [red]deleted![/] Press any key to continue..."
+                );
+            }
         }
     }
 }

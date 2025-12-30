@@ -2,57 +2,66 @@
 using CodeReviews.Console.CodingTracker.aneevel.Handlers;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Dapper;
+using Serilog;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Database
 {
-    /// <summary>
-    /// Concrete implementation of <c>IDatabaseManager</c> that can interface with Sqlite databases.
-    /// Contains helper methods for initializing and populating database
-    /// </summary>
     internal class SqliteDatabaseManager : IDatabaseManager
     {
         private readonly string _connectionString;
 
-        /// <summary>
-        /// Constructs a new <c>SqliteDatabaseManager</c> and connects to database with given name.
-        /// Creates one if it doesn't exist.
-        /// Adds relevant Type Handlers to help out the reflection system in Dapper
-        /// </summary>
-        /// <param name="connectionString">Name of the database file to connect to</param>
         public SqliteDatabaseManager(string connectionString)
         {
             _connectionString = connectionString;
-            Init();
+            if (Init() == -1)
+            {
+                Environment.Exit(-1);
+            }
 
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        /// <summary>
-        /// Sets <c>SqliteDatabaseManager</c> to initial state, creating the needed table if it doesn't exist.
-        /// </summary>
-        private void Init()
+        private int Init()
         {
-            if (!TableExists())
-            {
-                CreateTable();
-            }
+            return CreateTable();
         }
 
-        /// <summary>
-        /// Creates the main table (CodingSessions) within the database, given the existing connection
-        /// </summary>
-        private void CreateTable()
+        private int CreateTable()
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql =
-                "CREATE TABLE IF NOT EXISTS CodingSessions (Id INTEGER PRIMARY KEY AUTOINCREMENT, StartTime VARCHAR(255) NOT NULL, EndTime VARCHAR(255) NOT NULL, Duration VARCHAR(255) NOT NULL);";
-            db.Execute(sql);
+                @"CREATE TABLE IF NOT EXISTS CodingSessions (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                    StartTime VARCHAR(255) NOT NULL, 
+                    EndTime VARCHAR(255) NOT NULL, 
+                    Duration VARCHAR(255) NOT NULL
+                );";
+
+            try
+            {
+                db.Execute(sql);
+            }
+            catch (SQLiteException ex)
+            {
+                Log.Logger.Fatal(
+                    ex,
+                    @$"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(CreateTable)}\n
+                        Message: There was an issue creating the database!"
+                );
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(CreateTable)}\n
+                        Message: There was an explained issue!"
+                );
+                return -1;
+            }
+            return 0;
         }
 
-        /// <summary>
-        /// Read the records from main table
-        /// </summary>
-        /// <returns>A List of CodingSession records</returns>
         public List<CodingSession> ReadSessions()
         {
             using var db = new SQLiteConnection(_connectionString);
@@ -64,93 +73,163 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 sessions = [.. db.Query<CodingSession>(sql)];
             }
+            catch (SQLiteException ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    @$"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(ReadSessions)}\n
+                        Message: There was an issue reading sessions!"
+                );
+            }
             catch (Exception ex)
             {
-                System.Console.WriteLine($"Unable to read sessions due to error: {ex.Message}");
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(ReadSessions)}\n
+                        Message: There was an explained issue!"
+                );
             }
 
             return sessions;
         }
 
-        /// <summary>
-        /// Insert a session with the passed object
-        /// </summary>
-        /// <param name="session">Session to insert</param>
-        public void InsertRecord(CodingSession session)
+        public int InsertSession(CodingSession session)
         {
             using var db = new SQLiteConnection(_connectionString);
 
             string sql =
                 "INSERT INTO CodingSessions (StartTime, EndTime, Duration) VALUES (@startTime, @endTime, @duration)";
-            db.Execute(
-                sql,
-                new
-                {
-                    startTime = session.StartTime.ToString(),
-                    endTime = session.EndTime.ToString(),
-                    duration = session.Duration.ToString(),
-                }
-            );
+            try
+            {
+                db.Execute(
+                    sql,
+                    new
+                    {
+                        startTime = session.StartTime.ToString(),
+                        endTime = session.EndTime.ToString(),
+                        duration = session.Duration.ToString(),
+                    }
+                );
+            }
+            catch (SQLiteException ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(InsertSession)}\n
+                        Message: There was an issue inserting a new session!"
+                );
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(InsertSession)}\n
+                        Message: There was an explained issue!"
+                );
+                return -1;
+            }
+            return 0;
         }
 
-        /// <summary>
-        /// Update a session with the given ID
-        /// </summary>
-        /// <param name="id">ID of the session</param>
-        /// <param name="startTime">Start Time to update session with</param>
-        /// <param name="endTime">End Time to update session with</param>
-        /// <param name="duration">Duration to update session with</param>
-        public void UpdateSession(int id, DateTime startTime, DateTime endTime, TimeSpan duration)
+        public int UpdateSession(int id, DateTime startTime, DateTime endTime, TimeSpan duration)
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql =
                 "UPDATE CodingSessions SET StartTime = @startTime, EndTime = @endTime, Duration = @duration WHERE id = @id";
-            db.Execute(
-                sql,
-                new
-                {
-                    id,
-                    startTime = startTime.ToString(),
-                    endTime = endTime.ToString(),
-                    duration = duration.ToString(),
-                }
-            );
+            try
+            {
+                db.Execute(
+                    sql,
+                    new
+                    {
+                        id,
+                        startTime = startTime.ToString(),
+                        endTime = endTime.ToString(),
+                        duration = duration.ToString(),
+                    }
+                );
+            }
+            catch (SQLiteException ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(UpdateSession)}\n
+                        Message: There was an issue updating an existing session!"
+                );
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(UpdateSession)}\n
+                        Message: There was an explained issue!"
+                );
+            }
+            return 0;
         }
 
-        /// <summary>
-        /// Delete a session with the given ID
-        /// </summary>
-        /// <param name="id">ID of the session</param>
-        public void DeleteSession(int id)
+        public int DeleteSession(int id)
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql = "DELETE FROM CodingSessions WHERE id = @id";
-            db.Execute(sql, new { id });
+
+            try
+            {
+                db.Execute(sql, new { id });
+            }
+            catch (SQLiteException ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(DeleteSession)}\n
+                        Message: There was an issue deleting an existing session!"
+                );
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(DeleteSession)}\n
+                        Message: There was an explained issue!"
+                );
+                return -1;
+            }
+            return 0;
         }
 
-        /// <summary>
-        /// Check if a session exists with given ID
-        /// </summary>
-        /// <param name="id">Id of the session</param>
         public bool SessionExists(int id)
         {
             using var db = new SQLiteConnection(_connectionString);
             string sql = "SELECT * FROM CodingSessions WHERE id = @id";
-            var session = db.QuerySingleOrDefault<CodingSession>(sql, new { id });
+            CodingSession? codingSession;
 
-            return session != null;
-        }
+            try
+            {
+                codingSession = db.QuerySingleOrDefault<CodingSession>(sql, new { id });
+            }
+            catch (InvalidOperationException ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(SessionExists)}\n
+                        Message: There was an issue checking if a session with id {id} exists!"
+                );
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(
+                    ex,
+                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(SessionExists)}\n
+                        Message: There was an explained issue!"
+                );
+                return false;
+            }
 
-        /// <summary>
-        /// Check if the main table in database exists
-        /// </summary>
-        /// <returns> true if it exists, false otherwise </returns>
-        public bool TableExists()
-        {
-            using var db = new SQLiteConnection(_connectionString);
-            string sql =
-                "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'CodingSessions'";
-            return db.ExecuteScalar<int>(sql) != 0;
+            return codingSession != null;
         }
     }
 }
