@@ -52,6 +52,8 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                     "Welcome to the [grey]Main Menu.[/] Please select one of the following operations."
                 );
 
+                AnsiConsole.Clear();
+
                 switch (option)
                 {
                     case MenuOption.ViewAllSessions:
@@ -97,7 +99,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             _databaseManager.InsertRecord(session);
 
             UserInputService.GetUserContinue(
-                "[green]Running session saved![/] Press any key to continue..."
+                $"[green]Running session saved![/] Your session lasted [green]{session.Duration.Hours} hours, {session.Duration.Minutes} minutes, and {session.Duration.Seconds} seconds[/]! Press any key to continue..."
             );
         }
 

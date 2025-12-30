@@ -67,24 +67,70 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
                 return null;
             }
 
+            AnsiConsole.Clear();
+
             Stopwatch stopwatch = Stopwatch.StartNew();
+            DateTime startTime = DateTime.Now;
 
-            while (true)
+            var layout = new Layout("Root").SplitRows(new Layout("Top"), new Layout("Bottom"));
+
+            layout["Top"]
+                .Update(
+                    Align.Center(
+                        new Panel(
+                            "[blue]Coding session in progress...[/]\nEnter [blue]'s'[/] to end the session."
+                        ).BorderColor(Color.Cyan)
+                    )
+                )
+                .Ratio(1);
+
+            layout["Bottom"]
+                .Update(
+                    Align.Center(new Panel(new Markup("[blue]00:00:00[/]")).BorderColor(Color.Cyan))
+                )
+                .Ratio(2);
+
+            AnsiConsole
+                .Live(layout)
+                .AutoClear(true)
+                .Start(ctx =>
+                {
+                    while (true)
+                    {
+                        var elapsed = stopwatch.Elapsed;
+
+                        layout["Bottom"]
+                            .Update(
+                                Align.Center(
+                                    new Panel(
+                                        new Markup($"[blue]{elapsed:hh\\:mm\\:ss}[/]")
+                                    ).BorderColor(Color.Cyan)
+                                )
+                            )
+                            .Ratio(2);
+
+                        ctx.Refresh();
+                        if (System.Console.KeyAvailable)
+                        {
+                            if (System.Console.ReadKey().Key == ConsoleKey.S)
+                            {
+                                stopwatch.Stop();
+                                break;
+                            }
+                        }
+                    }
+                });
+
+            AnsiConsole.Clear();
+
+            DateTime endTime = startTime + stopwatch.Elapsed;
+
+            return new()
             {
-                AnsiConsole.Clear();
-                AnsiConsole.MarkupLine("[blue]Coding session in progress...[/]");
-                AnsiConsole.MarkupLine("Enter [blue]any key[/] to end the session.");
-
-                var elapsed = stopwatch.Elapsed;
-                var stopwatchDisplay = new Markup($"[blue]{elapsed:hh\\:mm\\:ss}[/]");
-                var stopwatchPanel = new Panel(stopwatchDisplay)
-                    .BorderColor(Color.Cyan)
-                    .RoundedBorder();
-                AnsiConsole.Write(stopwatchPanel);
-                Thread.Sleep(1000);
-            }
-
-            return new CodingSession();
+                StartTime = startTime,
+                EndTime = endTime,
+                Duration = endTime - startTime,
+            };
         }
 
         private static DateTime GetUserDate(string promptMessage, string invalidInputMessage)
