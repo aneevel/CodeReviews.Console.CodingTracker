@@ -1,4 +1,5 @@
-﻿using CodeReviews.Console.CodingTracker.aneevel.Models;
+﻿using System.Linq.Dynamic.Core;
+using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Spectre.Console;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Views
@@ -27,6 +28,9 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                 var pageIndex = 0;
                 var pageCount = (int)Math.Ceiling(codingSessions.Count / (double)_pageSize);
 
+                SortingField field = SortingField.Id;
+                SortingDirection direction = SortingDirection.ASC;
+
                 while (true)
                 {
                     var table = new Table();
@@ -36,10 +40,85 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                     table.AddColumn(new TableColumn("Duration"));
 
                     AnsiConsole.Write(_panel);
-                    List<CodingSession> pagedSessions = codingSessions
-                        .Skip(pageIndex * _pageSize)
-                        .Take(_pageSize)
-                        .ToList();
+
+                    List<CodingSession> pagedSessions = codingSessions;
+
+                    if (direction == SortingDirection.ASC)
+                    {
+                        switch (field)
+                        {
+                            case SortingField.Id:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderBy(codingSession => codingSession.Id),
+                                ];
+                                break;
+                            case SortingField.StartTime:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderBy(codingSession =>
+                                        codingSession.StartTime
+                                    ),
+                                ];
+                                break;
+                            case SortingField.EndTime:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderBy(codingSession =>
+                                        codingSession.EndTime
+                                    ),
+                                ];
+                                break;
+                            case SortingField.Duration:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderBy(codingSession =>
+                                        codingSession.Duration
+                                    ),
+                                ];
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        switch (field)
+                        {
+                            case SortingField.Id:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderByDescending(codingSession =>
+                                        codingSession.Id
+                                    ),
+                                ];
+                                break;
+                            case SortingField.StartTime:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderByDescending(codingSession =>
+                                        codingSession.StartTime
+                                    ),
+                                ];
+                                break;
+                            case SortingField.EndTime:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderByDescending(codingSession =>
+                                        codingSession.EndTime
+                                    ),
+                                ];
+                                break;
+                            case SortingField.Duration:
+                                pagedSessions =
+                                [
+                                    .. codingSessions.OrderByDescending(codingSession =>
+                                        codingSession.Duration
+                                    ),
+                                ];
+                                break;
+                        }
+                    }
+
+                    pagedSessions = [.. pagedSessions.Skip(pageIndex * _pageSize).Take(_pageSize)];
 
                     AnsiConsole.MarkupLine(
                         $@"Showing sessions {pageIndex * _pageSize} - {pageIndex * _pageSize + 9}
@@ -60,7 +139,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
 
                     var prompt = new SelectionPrompt<string>()
                         .Title("Navigate Pages:")
-                        .AddChoices("Exit to Main Menu");
+                        .AddChoices(["Exit to Main Menu", "Sort Data"]);
 
                     if (pageIndex > 0)
                     {
@@ -75,15 +154,52 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                     var menuSelection = AnsiConsole.Prompt(prompt);
 
                     if (menuSelection == "Next")
+                    {
                         pageIndex++;
+                        AnsiConsole.Clear();
+                    }
                     else if (menuSelection == "Previous")
+                    {
                         pageIndex--;
-                    else if (menuSelection == "Exit to Main Menu")
-                        break;
+                        AnsiConsole.Clear();
+                    }
+                    else if (menuSelection == "Sort Data")
+                    {
+                        field = AnsiConsole.Prompt(
+                            new SelectionPrompt<SortingField>()
+                                .Title("Field to Sort On?")
+                                .AddChoices(Enum.GetValues<SortingField>())
+                        );
 
-                    AnsiConsole.Clear();
+                        direction = AnsiConsole.Prompt(
+                            new SelectionPrompt<SortingDirection>()
+                                .Title("Direction to Sort By?")
+                                .AddChoices(Enum.GetValues<SortingDirection>())
+                        );
+                        AnsiConsole.Clear();
+                        pageIndex = 0;
+                    }
+                    else if (menuSelection == "Exit to Main Menu")
+                    {
+                        AnsiConsole.Clear();
+                        break;
+                    }
                 }
             }
         }
+    }
+
+    public enum SortingField
+    {
+        Id,
+        StartTime,
+        EndTime,
+        Duration,
+    }
+
+    public enum SortingDirection
+    {
+        ASC,
+        DSC,
     }
 }
