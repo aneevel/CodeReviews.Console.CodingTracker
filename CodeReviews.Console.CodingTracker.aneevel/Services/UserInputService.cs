@@ -7,17 +7,17 @@ using Spectre.Console;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Services
 {
-    internal class UserInputService
+    internal static class UserInputService
     {
-        private static readonly int _pageSize = 10;
+        private const int PageSize = 10;
 
         internal static MenuOption GetMenuSelection(string message)
         {
-            MenuOption input = AnsiConsole.Prompt(
+            var input = AnsiConsole.Prompt(
                 new SelectionPrompt<MenuOption>()
                     .Title(message)
                     .AddChoices(Enum.GetValues<MenuOption>())
-                    .PageSize(_pageSize)
+                    .PageSize(PageSize)
                     .MoreChoicesText("[grey](Use arrow keys to see more options)[/]")
                     .UseConverter(option => option.GetDisplayName())
             );
@@ -29,11 +29,11 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
         {
             while (true)
             {
-                DateTime startTime = GetDate(
+                var startTime = GetDate(
                     "Enter the Start Time of the session in format MM/dd/yyyy hh:mm AM/PM",
                     "Incorrect format provided; please provide Start Time in the given format."
                 );
-                DateTime endTime = GetDate(
+                var endTime = GetDate(
                     "Enter the End Time of the session in format MM/dd/yyyy hh:mm AM/PM:",
                     "Incorrect format provided; please provide End Time in the given format."
                 );
@@ -73,8 +73,8 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
 
             AnsiConsole.Clear();
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            DateTime startTime = DateTime.Now;
+            var stopwatch = Stopwatch.StartNew();
+            var startTime = DateTime.Now;
 
             var layout = new Layout("Root").SplitRows(new Layout("Top"), new Layout("Bottom"));
 
@@ -114,22 +114,21 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
                             .Ratio(2);
 
                         ctx.Refresh();
-                        if (System.Console.KeyAvailable)
-                        {
-                            if (System.Console.ReadKey().Key == ConsoleKey.S)
-                            {
-                                stopwatch.Stop();
-                                break;
-                            }
-                        }
+                        
+                        if (!System.Console.KeyAvailable) continue;
+                        if (System.Console.ReadKey().Key != ConsoleKey.S) continue;
+                        
+                        stopwatch.Stop();
+                        
+                        break;
                     }
                 });
 
             AnsiConsole.Clear();
 
-            DateTime endTime = startTime + stopwatch.Elapsed;
+            var endTime = startTime + stopwatch.Elapsed;
 
-            return new()
+            return new CodingSession
             {
                 StartTime = startTime,
                 EndTime = endTime,
@@ -141,7 +140,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
         {
             while (true)
             {
-                string dateResponse = AnsiConsole.Ask<string>(promptMessage);
+                var dateResponse = AnsiConsole.Ask<string>(promptMessage);
 
                 if (
                     !DateTime.TryParseExact(
@@ -149,12 +148,11 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
                         "MM/dd/yyyy hh:mm tt",
                         new CultureInfo("en-US"),
                         DateTimeStyles.None,
-                        out DateTime dateTime
+                        out var dateTime
                     )
                 )
                 {
                     AnsiConsole.WriteLine(invalidInputMessage);
-                    continue;
                 }
                 else
                 {
@@ -179,12 +177,46 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
                 new SelectionPrompt<CodingSession>()
                     .Title(promptMessage)
                     .AddChoices(codingSessions.Select(codingSession => codingSession))
-                    .PageSize(_pageSize)
+                    .PageSize(PageSize)
                     .MoreChoicesText("[grey](Use arrow keys to see more options)[/]")
                     .UseConverter(codingSession =>
                         $"ID: {codingSession.Id} - Start Time: {codingSession.StartTime} - End Time: {codingSession.EndTime}"
                     )
             );
+        }
+
+        internal static string GetPageNavigationOption(string promptMessage, List<string> choices)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                .Title(promptMessage)
+                .AddChoices(choices));
+        }
+
+        internal static Tuple<SortingField, SortingDirection> GetSortingOptions(string fieldPrompt,
+            string directionPrompt, SortingField[] fieldOptions, SortingDirection[] directionOptions)
+        {
+            var field = GetSortingField(fieldPrompt, fieldOptions);
+            var direction = GetSortingDirection(directionPrompt, directionOptions);
+            
+            return new Tuple<SortingField, SortingDirection>(field, direction);
+        }
+
+        private static SortingField GetSortingField(string fieldPrompt, SortingField[] fieldOptions)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<SortingField>()
+                    .Title(fieldPrompt)
+                    .AddChoices(fieldOptions));
+        }
+
+        private static SortingDirection GetSortingDirection(string directionPrompt,
+            SortingDirection[] directionOptions)
+        {
+            return AnsiConsole.Prompt(
+                new SelectionPrompt<SortingDirection>()
+                .Title(directionPrompt)
+                .AddChoices(directionOptions));
         }
 
         internal static bool GetConfirmation(string promptMessage, string unconfirmMessage)
@@ -198,5 +230,6 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Services
             AnsiConsole.Clear();
             return true;
         }
+        
     }
 }

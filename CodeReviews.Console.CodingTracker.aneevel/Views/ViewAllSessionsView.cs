@@ -1,7 +1,8 @@
-﻿using System.Globalization;
-using CodeReviews.Console.CodingTracker.aneevel.Enums;
+﻿using CodeReviews.Console.CodingTracker.aneevel.Enums;
 using CodeReviews.Console.CodingTracker.aneevel.Extensions;
+using CodeReviews.Console.CodingTracker.aneevel.Helpers;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
+using CodeReviews.Console.CodingTracker.aneevel.Services;
 using Spectre.Console;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Views
@@ -35,20 +36,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
 
                 while (true)
                 {
-                    var table = new Table();
-                    table.AddColumn(new TableColumn("ID"));
-                    table.AddColumn(new TableColumn("Start Date"));
-                    table.AddColumn(new TableColumn("End Date"));
-                    table.AddColumn(new TableColumn("Duration"));
-
                     AnsiConsole.Write(_panel);
 
                     var pagedSessions =
                         codingSessions
                             .SortBy(field, direction)
                             .TakeElementsAtIndex(pageIndex * _pageSize, _pageSize).ToList();
-
-                    pagedSessions = [.. pagedSessions.Skip(pageIndex * _pageSize).Take(_pageSize)];
 
                     AnsiConsole.MarkupLine(
                         $"""
@@ -57,33 +50,23 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                          """
                     );
 
-                    foreach (var codingSession in pagedSessions)
-                    {
-                        table.AddRow(
-                            codingSession.Id.ToString(),
-                            codingSession.StartTime.ToString(CultureInfo.InvariantCulture),
-                            codingSession.EndTime.ToString(CultureInfo.InvariantCulture),
-                            codingSession.Duration.ToString(@"hh\:mm\:ss")
-                        );
-                    }
+                    var table = TableHelper.BuildSessionsTable(pagedSessions);
 
                     AnsiConsole.Write(table);
 
-                    var prompt = new SelectionPrompt<string>()
-                        .Title("Navigate Pages:")
-                        .AddChoices(["Exit to Main Menu", "Sort Data"]);
-
+                    List<string> choices = ["Exit to Main Menu", "Sort Data"];
+                    
                     if (pageIndex > 0)
                     {
-                        prompt.AddChoices("Previous");
+                        choices.Add("Previous");
                     }
 
                     if (pageIndex < pageCount - 1)
                     {
-                        prompt.AddChoices("Next");
+                        choices.Add("Next");
                     }
 
-                    var menuSelection = AnsiConsole.Prompt(prompt);
+                    var menuSelection = UserInputService.GetPageNavigationOption("Select option:", choices);
 
                     if (menuSelection == "Next")
                     {
@@ -97,17 +80,11 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                     }
                     else if (menuSelection == "Sort Data")
                     {
-                        field = AnsiConsole.Prompt(
-                            new SelectionPrompt<SortingField>()
-                                .Title("Field to Sort On?")
-                                .AddChoices(Enum.GetValues<SortingField>())
-                        );
-
-                        direction = AnsiConsole.Prompt(
-                            new SelectionPrompt<SortingDirection>()
-                                .Title("Direction to Sort By?")
-                                .AddChoices(Enum.GetValues<SortingDirection>())
-                        );
+                        (field, direction) = UserInputService.GetSortingOptions("Field to Sort On?",
+                            "Direction to Sort By?",
+                            Enum.GetValues<SortingField>(),
+                            Enum.GetValues<SortingDirection>());
+                        
                         AnsiConsole.Clear();
                         pageIndex = 0;
                     }
