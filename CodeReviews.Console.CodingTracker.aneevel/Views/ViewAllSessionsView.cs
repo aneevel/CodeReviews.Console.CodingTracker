@@ -1,4 +1,5 @@
-﻿using System.Linq.Dynamic.Core;
+﻿using System.Globalization;
+using CodeReviews.Console.CodingTracker.aneevel.Extensions;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Spectre.Console;
 
@@ -28,8 +29,8 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                 var pageIndex = 0;
                 var pageCount = (int)Math.Ceiling(codingSessions.Count / (double)_pageSize);
 
-                SortingField field = SortingField.Id;
-                SortingDirection direction = SortingDirection.ASC;
+                var field = SortingField.Id;
+                var direction = SortingDirection.ASC;
 
                 while (true)
                 {
@@ -41,97 +42,27 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
 
                     AnsiConsole.Write(_panel);
 
-                    List<CodingSession> pagedSessions = codingSessions;
-
-                    if (direction == SortingDirection.ASC)
-                    {
-                        switch (field)
-                        {
-                            case SortingField.Id:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderBy(codingSession => codingSession.Id),
-                                ];
-                                break;
-                            case SortingField.StartTime:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderBy(codingSession =>
-                                        codingSession.StartTime
-                                    ),
-                                ];
-                                break;
-                            case SortingField.EndTime:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderBy(codingSession =>
-                                        codingSession.EndTime
-                                    ),
-                                ];
-                                break;
-                            case SortingField.Duration:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderBy(codingSession =>
-                                        codingSession.Duration
-                                    ),
-                                ];
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        switch (field)
-                        {
-                            case SortingField.Id:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderByDescending(codingSession =>
-                                        codingSession.Id
-                                    ),
-                                ];
-                                break;
-                            case SortingField.StartTime:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderByDescending(codingSession =>
-                                        codingSession.StartTime
-                                    ),
-                                ];
-                                break;
-                            case SortingField.EndTime:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderByDescending(codingSession =>
-                                        codingSession.EndTime
-                                    ),
-                                ];
-                                break;
-                            case SortingField.Duration:
-                                pagedSessions =
-                                [
-                                    .. codingSessions.OrderByDescending(codingSession =>
-                                        codingSession.Duration
-                                    ),
-                                ];
-                                break;
-                        }
-                    }
+                    var pagedSessions =
+                        codingSessions
+                            .SortBy(field, direction)
+                            .TakeElementsAtIndex(pageIndex * _pageSize, _pageSize).ToList();
 
                     pagedSessions = [.. pagedSessions.Skip(pageIndex * _pageSize).Take(_pageSize)];
 
                     AnsiConsole.MarkupLine(
-                        $@"Showing sessions {pageIndex * _pageSize} - {pageIndex * _pageSize + 9}
-                        on page {pageIndex + 1} of {pageCount}"
+                        $"""
+                         Showing sessions {pageIndex * _pageSize} - {pageIndex * _pageSize + 9}
+                                                 on page {pageIndex + 1} of {pageCount}
+                         """
                     );
 
-                    foreach (CodingSession codingSession in pagedSessions)
+                    foreach (var codingSession in pagedSessions)
                     {
                         table.AddRow(
                             codingSession.Id.ToString(),
-                            codingSession.StartTime.ToString(),
-                            codingSession.EndTime.ToString(),
-                            codingSession.Duration.ToString("hh\\:mm\\:ss")
+                            codingSession.StartTime.ToString(CultureInfo.InvariantCulture),
+                            codingSession.EndTime.ToString(CultureInfo.InvariantCulture),
+                            codingSession.Duration.ToString(@"hh\:mm\:ss")
                         );
                     }
 
@@ -194,12 +125,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
         Id,
         StartTime,
         EndTime,
-        Duration,
+        Duration
     }
 
     public enum SortingDirection
     {
         ASC,
-        DSC,
+        DSC
     }
 }
