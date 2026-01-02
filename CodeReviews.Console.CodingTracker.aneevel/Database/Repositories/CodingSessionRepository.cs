@@ -69,7 +69,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                                           Message: There was an issue inserting a new session!
                                   """, typeof(CodingSessionRepository), nameof(InsertCodingSession)
                 );
-                return -1;
+                return 1;
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                                           Message: There was an explained issue!
                                   """, typeof(CodingSessionRepository), nameof(InsertCodingSession)
                 );
-                return -1;
+                return 1;
             }
             return 0;
     }
@@ -111,7 +111,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                        Message: There was an issue updating an existing session!
                """, typeof(CodingSessionRepository), nameof(UpdateCodingSession)
            );
-           return -1;
+           return 1;
        }
        catch (Exception ex)
        {
@@ -122,6 +122,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                        Message: There was an explained issue!
                """, typeof(CodingSessionRepository), nameof(UpdateCodingSession)
            );
+           return 1;
        }
        return 0;
     }
@@ -144,7 +145,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                        Message: There was an issue deleting an existing session!
                """, typeof(CodingSessionRepository), nameof(DeleteCodingSession)
            );
-           return -1;
+           return 1;
        }
        catch (Exception ex)
        {
@@ -155,7 +156,7 @@ public class CodingSessionRepository(string connectionString) : ICodingSessionRe
                                        Message: There was an explained issue!
                """, typeof(CodingSessionRepository), nameof(DeleteCodingSession)
            );
-           return -1;
+           return 1;
        }
        return 0;
     }
