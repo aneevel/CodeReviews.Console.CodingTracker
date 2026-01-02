@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using System.Globalization;
 using CodeReviews.Console.CodingTracker.aneevel.Handlers;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Dapper;
@@ -6,14 +7,15 @@ using Serilog;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Database
 {
-    internal class SqliteDatabaseManager : IDatabaseManager
+    internal class SqliteDatabaseInitializer : IDatabaseInitializer
     {
         private readonly string _connectionString;
 
-        public SqliteDatabaseManager(string connectionString)
+        public SqliteDatabaseInitializer(string connectionString)
         {
             _connectionString = connectionString;
-            if (Init() == -1)
+            
+            if (InitializeDatabase() == -1)
             {
                 Environment.Exit(-1);
             }
@@ -21,7 +23,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             SqlMapper.AddTypeHandler(new TimeSpanHandler());
         }
 
-        private int Init()
+        public int InitializeDatabase()
         {
             return CreateTable();
         }
@@ -29,8 +31,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         private int CreateTable()
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql =
-                @"CREATE TABLE IF NOT EXISTS CodingSessions (
+            const string sql = @"CREATE TABLE IF NOT EXISTS CodingSessions (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT, 
                     StartTime VARCHAR(255) NOT NULL, 
                     EndTime VARCHAR(255) NOT NULL, 
@@ -45,8 +46,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Fatal(
                     ex,
-                    @$"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(CreateTable)}\n
-                        Message: There was an issue creating the database!"
+                    """
+                                  Class:{Type} Method: {CreateTableName}\n
+                                                          Message: There was an issue creating the database!
+                                  """, typeof(SqliteDatabaseManager), nameof(CreateTable)
                 );
                 return -1;
             }
@@ -54,8 +57,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(CreateTable)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {CreateTableName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(CreateTable)
                 );
                 return -1;
             }
@@ -65,7 +70,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         public List<CodingSession> ReadSessions()
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql = "SELECT Id, StartTime, EndTime, Duration FROM CodingSessions";
+            const string sql = "SELECT Id, StartTime, EndTime, Duration FROM CodingSessions";
 
             List<CodingSession> sessions = [];
 
@@ -77,16 +82,20 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    @$"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(ReadSessions)}\n
-                        Message: There was an issue reading sessions!"
+                    """
+                    Class:{Type} Method: {ReadSessionsName}\n
+                                            Message: There was an issue reading sessions!
+                    """, typeof(SqliteDatabaseManager), nameof(ReadSessions)
                 );
             }
             catch (Exception ex)
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(ReadSessions)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {ReadSessionsName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(ReadSessions)
                 );
             }
 
@@ -97,17 +106,16 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         {
             using var db = new SQLiteConnection(_connectionString);
 
-            string sql =
-                "INSERT INTO CodingSessions (StartTime, EndTime, Duration) VALUES (@startTime, @endTime, @duration)";
+            const string sql = "INSERT INTO CodingSessions (StartTime, EndTime, Duration) VALUES (@startTime, @endTime, @duration)";
             try
             {
                 db.Execute(
                     sql,
                     new
                     {
-                        startTime = session.StartTime.ToString(),
-                        endTime = session.EndTime.ToString(),
-                        duration = session.Duration.ToString(),
+                        startTime = session.StartTime.ToString(CultureInfo.InvariantCulture),
+                        endTime = session.EndTime.ToString(CultureInfo.InvariantCulture),
+                        duration = session.Duration.ToString(@"hh\:mm\:ss"),
                     }
                 );
             }
@@ -115,8 +123,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(InsertSession)}\n
-                        Message: There was an issue inserting a new session!"
+                    """
+                                  Class:{Type} Method: {InsertSessionName}\n
+                                                          Message: There was an issue inserting a new session!
+                                  """, typeof(SqliteDatabaseManager), nameof(InsertSession)
                 );
                 return -1;
             }
@@ -124,8 +134,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(InsertSession)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {InsertSessionName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(InsertSession)
                 );
                 return -1;
             }
@@ -135,8 +147,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         public int UpdateSession(int id, DateTime startTime, DateTime endTime, TimeSpan duration)
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql =
-                "UPDATE CodingSessions SET StartTime = @startTime, EndTime = @endTime, Duration = @duration WHERE id = @id";
+            const string sql = "UPDATE CodingSessions SET StartTime = @startTime, EndTime = @endTime, Duration = @duration WHERE id = @id";
             try
             {
                 db.Execute(
@@ -144,9 +155,9 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
                     new
                     {
                         id,
-                        startTime = startTime.ToString(),
-                        endTime = endTime.ToString(),
-                        duration = duration.ToString(),
+                        startTime = startTime.ToString(CultureInfo.InvariantCulture),
+                        endTime = endTime.ToString(CultureInfo.InvariantCulture),
+                        duration = duration.ToString(@"hh\:mm\:ss"),
                     }
                 );
             }
@@ -154,8 +165,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(UpdateSession)}\n
-                        Message: There was an issue updating an existing session!"
+                    """
+                                  Class:{Type} Method: {UpdateSessionName}\n
+                                                          Message: There was an issue updating an existing session!
+                                  """, typeof(SqliteDatabaseManager), nameof(UpdateSession)
                 );
                 return -1;
             }
@@ -163,8 +176,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(UpdateSession)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {UpdateSessionName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(UpdateSession)
                 );
             }
             return 0;
@@ -173,7 +188,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         public int DeleteSession(int id)
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql = "DELETE FROM CodingSessions WHERE id = @id";
+            const string sql = "DELETE FROM CodingSessions WHERE id = @id";
 
             try
             {
@@ -183,8 +198,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(DeleteSession)}\n
-                        Message: There was an issue deleting an existing session!"
+                    """
+                                  Class:{Type} Method: {DeleteSessionName}\n
+                                                          Message: There was an issue deleting an existing session!
+                                  """, typeof(SqliteDatabaseManager), nameof(DeleteSession)
                 );
                 return -1;
             }
@@ -192,8 +209,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(DeleteSession)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {DeleteSessionName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(DeleteSession)
                 );
                 return -1;
             }
@@ -203,7 +222,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
         public bool SessionExists(int id)
         {
             using var db = new SQLiteConnection(_connectionString);
-            string sql = "SELECT * FROM CodingSessions WHERE id = @id";
+            const string sql = "SELECT * FROM CodingSessions WHERE id = @id";
             CodingSession? codingSession;
 
             try
@@ -214,8 +233,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(SessionExists)}\n
-                        Message: There was an issue checking if a session with id {id} exists!"
+                    """
+                                  Class:{Type} Method: {SessionExistsName}\n
+                                                          Message: There was an issue checking if a session with id {Id} exists!
+                                  """, typeof(SqliteDatabaseManager), nameof(SessionExists), id
                 );
                 return false;
             }
@@ -223,8 +244,10 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Database
             {
                 Log.Logger.Error(
                     ex,
-                    $@"Class:{typeof(SqliteDatabaseManager)} Method: {nameof(SessionExists)}\n
-                        Message: There was an explained issue!"
+                    """
+                                  Class:{Type} Method: {SessionExistsName}\n
+                                                          Message: There was an explained issue!
+                                  """, typeof(SqliteDatabaseManager), nameof(SessionExists)
                 );
                 return false;
             }

@@ -1,9 +1,7 @@
 ﻿using CodeReviews.Console.CodingTracker.aneevel.Database;
 using CodeReviews.Console.CodingTracker.aneevel.Enums;
-using CodeReviews.Console.CodingTracker.aneevel.Models;
 using CodeReviews.Console.CodingTracker.aneevel.Services;
 using CodeReviews.Console.CodingTracker.aneevel.Views;
-using Serilog;
 using Spectre.Console;
 
 namespace CodeReviews.Console.CodingTracker.aneevel
@@ -17,7 +15,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
         public CodingTracker(string connectionString)
         {
-            _databaseManager = new(connectionString);
+            _databaseManager = new SqliteDatabaseManager(connectionString);
 
             MainMenuView mainMenuView = new();
             ViewAllSessionsView viewAllSessionsView = new();
@@ -49,7 +47,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             {
                 mainMenuView.Render();
 
-                MenuOption option = UserInputService.GetMenuSelection(
+                var option = UserInputService.GetMenuSelection(
                     "Welcome to the [grey]Main Menu.[/] Please select one of the following operations."
                 );
 
@@ -75,6 +73,8 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                     case MenuOption.ExitApplication:
                         Environment.Exit(0);
                         break;
+                    default:
+                        throw new InvalidOperationException("Unknown Menu Option provided!");
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         private void StartRunningSession(RunningSessionView runningSessionView)
         {
             runningSessionView.Render();
-            CodingSession? session = UserInputService.GetRunningCodingSession();
+            var session = UserInputService.GetRunningCodingSession();
 
             if (session == null)
             {
@@ -107,7 +107,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             insertNewSessionView.Render();
 
-            CodingSession session = UserInputService.GetNewCodingSession();
+            var session = UserInputService.GetNewCodingSession();
 
             if (_databaseManager.InsertSession(session) == 0)
             {
@@ -121,7 +121,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             updateSessionView.Render();
 
-            CodingSession selectedSession = UserInputService.GetExistingCodingSession(
+            var selectedSession = UserInputService.GetExistingCodingSession(
                 "Select the session you wish to modify:",
                 _databaseManager.ReadSessions()
             );
@@ -136,7 +136,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            CodingSession updatedSession = UserInputService.GetNewCodingSession();
+            var updatedSession = UserInputService.GetNewCodingSession();
             updatedSession.Id = selectedSession.Id;
 
             if (
@@ -158,7 +158,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
         {
             deleteSessionView.Render();
 
-            CodingSession selectedSession = UserInputService.GetExistingCodingSession(
+            var selectedSession = UserInputService.GetExistingCodingSession(
                 "Select the session you wish to delete:",
                 _databaseManager.ReadSessions()
             );
