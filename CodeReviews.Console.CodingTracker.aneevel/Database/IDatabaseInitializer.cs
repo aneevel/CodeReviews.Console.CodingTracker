@@ -1,6 +1,4 @@
-﻿using CodeReviews.Console.CodingTracker.aneevel.Models;
-
-namespace CodeReviews.Console.CodingTracker.aneevel.Database
+﻿namespace CodeReviews.Console.CodingTracker.aneevel.Database
 {
     internal interface IDatabaseInitializer
     {

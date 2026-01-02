@@ -1,4 +1,5 @@
 ﻿using CodeReviews.Console.CodingTracker.aneevel.Database;
+using CodeReviews.Console.CodingTracker.aneevel.Database.Repositories;
 using CodeReviews.Console.CodingTracker.aneevel.Enums;
 using CodeReviews.Console.CodingTracker.aneevel.Services;
 using CodeReviews.Console.CodingTracker.aneevel.Views;
@@ -11,11 +12,12 @@ namespace CodeReviews.Console.CodingTracker.aneevel
     /// </summary>
     public class CodingTracker
     {
-        private readonly SqliteDatabaseManager _databaseManager;
+        private readonly SqliteDatabaseInitializer _databaseInitializer;
+        private readonly CodingSessionRepository _codingSessionRepository;
 
         public CodingTracker(string connectionString)
         {
-            _databaseManager = new SqliteDatabaseManager(connectionString);
+            _databaseInitializer = new SqliteDatabaseInitializer(connectionString);
 
             MainMenuView mainMenuView = new();
             ViewAllSessionsView viewAllSessionsView = new();
@@ -23,6 +25,8 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             InsertNewSessionView insertNewSessionView = new();
             UpdateSessionView updateSessionView = new();
             DeleteSessionView deleteSessionView = new();
+
+            _codingSessionRepository = new CodingSessionRepository(connectionString);
 
             Run(
                 mainMenuView,
@@ -81,7 +85,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
         private void ViewAllSessions(ViewAllSessionsView viewAllSessionsView)
         {
-            var sessions = _databaseManager.ReadSessions();
+            var sessions = _codingSessionRepository.GetCodingSessions();
             viewAllSessionsView.Render(sessions);
         }
 
@@ -95,7 +99,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            if (_databaseManager.InsertSession(session) == 0)
+            if (_codingSessionRepository.InsertCodingSession(session) == 0)
             {
                 UserInputService.GetContinue(
                     $"[green]Running session saved![/] Your session lasted [green]{session.Duration.Hours} hours, {session.Duration.Minutes} minutes, and {session.Duration.Seconds} seconds[/]! Press any key to continue..."
@@ -109,7 +113,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             var session = UserInputService.GetNewCodingSession();
 
-            if (_databaseManager.InsertSession(session) == 0)
+            if (_codingSessionRepository.InsertCodingSession(session) == 0)
             {
                 UserInputService.GetContinue(
                     "[green]Session created![/] Press any key to continue..."
@@ -123,7 +127,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             var selectedSession = UserInputService.GetExistingCodingSession(
                 "Select the session you wish to modify:",
-                _databaseManager.ReadSessions()
+                _codingSessionRepository.GetCodingSessions()
             );
 
             if (
@@ -140,7 +144,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
             updatedSession.Id = selectedSession.Id;
 
             if (
-                _databaseManager.UpdateSession(
+                _codingSessionRepository.UpdateCodingSession(
                     updatedSession.Id,
                     updatedSession.StartTime,
                     updatedSession.EndTime,
@@ -160,7 +164,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
 
             var selectedSession = UserInputService.GetExistingCodingSession(
                 "Select the session you wish to delete:",
-                _databaseManager.ReadSessions()
+                _codingSessionRepository.GetCodingSessions()
             );
 
             if (
@@ -173,7 +177,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel
                 return;
             }
 
-            if (_databaseManager.DeleteSession(selectedSession.Id) == 0)
+            if (_codingSessionRepository.DeleteCodingSession(selectedSession.Id) == 0)
             {
                 UserInputService.GetContinue(
                     $"Session with ID {selectedSession.Id} successfully [red]deleted![/] Press any key to continue..."
