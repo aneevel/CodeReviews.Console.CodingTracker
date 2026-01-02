@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using CodeReviews.Console.CodingTracker.aneevel.Enums;
 using CodeReviews.Console.CodingTracker.aneevel.Extensions;
 using CodeReviews.Console.CodingTracker.aneevel.Models;
 using Spectre.Console;
@@ -30,7 +31,7 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                 var pageCount = (int)Math.Ceiling(codingSessions.Count / (double)_pageSize);
 
                 var field = SortingField.Id;
-                var direction = SortingDirection.ASC;
+                var direction = SortingDirection.Asc;
 
                 while (true)
                 {
@@ -118,19 +119,5 @@ namespace CodeReviews.Console.CodingTracker.aneevel.Views
                 }
             }
         }
-    }
-
-    public enum SortingField
-    {
-        Id,
-        StartTime,
-        EndTime,
-        Duration
-    }
-
-    public enum SortingDirection
-    {
-        ASC,
-        DSC
     }
 }

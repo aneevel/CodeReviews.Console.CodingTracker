@@ -1,5 +1,5 @@
 using CodeReviews.Console.CodingTracker.aneevel.Models;
-using CodeReviews.Console.CodingTracker.aneevel.Views;
+using CodeReviews.Console.CodingTracker.aneevel.Enums;
 
 namespace CodeReviews.Console.CodingTracker.aneevel.Extensions;
 
@@ -21,53 +21,42 @@ internal static class CodingSessionExtensions
 
     private List<CodingSession> SortById(SortingDirection direction)
     {
-        if (direction == SortingDirection.ASC)
+        return direction switch
         {
-            return [.. sessions.OrderBy(codingSession => codingSession.Id)];
-        }
-        else
-        {
-            return [.. sessions.OrderByDescending(codingSession => codingSession.Id)];
-        }
+            SortingDirection.Asc => [.. sessions.OrderBy(codingSession => codingSession.Id)],
+            SortingDirection.Desc => [.. sessions.OrderByDescending(codingSession => codingSession.Id)],
+            _ => throw new InvalidOperationException("Unhandled sorting direction provided!")
+        };
     }
 
     private List<CodingSession> SortByStartTime(SortingDirection direction)
     {
-        if (direction == SortingDirection.ASC)
+        return direction switch
         {
-            return [.. sessions.OrderBy(codingSession => codingSession.StartTime)];
-        }
-        else
-        {
-            return
-            [
-                .. sessions.OrderByDescending(codingSession => codingSession.StartTime),
-            ];
-        }
+            SortingDirection.Asc => [.. sessions.OrderBy(codingSession => codingSession.StartTime)],
+            SortingDirection.Desc => [.. sessions.OrderByDescending(codingSession => codingSession.StartTime),],
+            _ => throw new InvalidOperationException("Unhandled sorting direction provided!")
+        };
     }
 
     private List<CodingSession> SortByEndTime(SortingDirection direction)
     {
-        if (direction == SortingDirection.ASC)
+        return direction switch
         {
-            return [.. sessions.OrderBy(codingSession => codingSession.EndTime)];
-        }
-        else
-        {
-            return [.. sessions.OrderByDescending(codingSession => codingSession.EndTime)];
-        }
+            SortingDirection.Asc => [.. sessions.OrderBy(codingSession => codingSession.EndTime)],
+            SortingDirection.Desc => [.. sessions.OrderByDescending(codingSession => codingSession.EndTime)],
+            _ => throw new InvalidOperationException("Unhandled sorting direction provided!")
+        };
     }
 
     private List<CodingSession> SortByDuration(SortingDirection direction)
     {
-        if (direction == SortingDirection.ASC)
+        return direction switch
         {
-            return [.. sessions.OrderBy(codingSession => codingSession.Duration)];
-        }
-        else
-        {
-            return [.. sessions.OrderByDescending(codingSession => codingSession.Duration)];
-        }
+            SortingDirection.Asc => [.. sessions.OrderBy(codingSession => codingSession.Duration)],
+            SortingDirection.Desc => [.. sessions.OrderByDescending(codingSession => codingSession.Duration)],
+            _ => throw new InvalidOperationException("Unhandled sorting direction provided!")
+        };
     }
 
     internal List<CodingSession> TakeElementsAtIndex(int skipSize, int takeSize)
